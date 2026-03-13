@@ -35,6 +35,47 @@ const Dashboard = () => {
     }
   };
 
+  const handleDelete = async (postId) => {
+    console.log('Delete requested for post:', postId);
+    
+    // Show confirmation dialog
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this post? This action cannot be undone.'
+    );
+
+    if (!confirmed) {
+      console.log('Delete cancelled by user');
+      return;
+    }
+
+    try {
+      console.log('Sending delete request to API for:', postId);
+      const response = await api.delete(`/api/posts/${postId}`);
+      console.log('Delete response:', response.data);
+
+      if (response.data.success) {
+        // Optimistic update
+        setPosts((prevPosts) => {
+          const updatedPosts = prevPosts.filter(p => p._id !== postId);
+          console.log('UI updated. Remaining posts:', updatedPosts.length);
+          return updatedPosts;
+        });
+        
+        setPagination(prev => ({
+          ...prev,
+          total: prev.total - 1
+        }));
+        
+        alert('Post deleted successfully');
+      }
+    } catch (err) {
+      console.error('Delete error detail:', err);
+      const errorMsg = err.response?.data?.message || err.message || 'Failed to delete post';
+      console.error('User-facing error:', errorMsg);
+      alert(errorMsg);
+    }
+  };
+
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
@@ -90,6 +131,19 @@ const Dashboard = () => {
                   </p>
                   <div style={metaStyle}>
                     <span>📅 {new Date(post.createdAt).toLocaleDateString()}</span>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div style={actionsStyle}>
+                    <Link to={`/edit/${post._id}`}>
+                      <button style={editButtonStyle}>Edit</button>
+                    </Link>
+                    <button 
+                      onClick={() => handleDelete(post._id)}
+                      style={deleteButtonStyle}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               ))}
@@ -302,6 +356,38 @@ const errorStyle = {
   borderRadius: '12px',
   marginBottom: '2rem',
   textAlign: 'center',
+};
+
+const actionsStyle = {
+  display: 'flex',
+  gap: '1rem',
+  marginTop: '1.5rem',
+  paddingTop: '1.5rem',
+  borderTop: '1px solid #f1f1f1',
+};
+
+const editButtonStyle = {
+  padding: '0.6rem 1.2rem',
+  backgroundColor: '#f1f7ff',
+  color: '#4a90e2',
+  border: '1px solid #4a90e2',
+  borderRadius: '10px',
+  cursor: 'pointer',
+  fontWeight: '600',
+  fontSize: '0.9rem',
+  transition: 'all 0.2s',
+};
+
+const deleteButtonStyle = {
+  padding: '0.6rem 1.2rem',
+  backgroundColor: '#fff',
+  color: '#dc3545',
+  border: '1px solid #ffcccc',
+  borderRadius: '10px',
+  cursor: 'pointer',
+  fontWeight: '600',
+  fontSize: '0.9rem',
+  transition: 'all 0.2s',
 };
 
 const loadingStyle = {

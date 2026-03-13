@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext'; // Import
+import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import PublicRoute from './components/common/PublicRoute';
 import Header from './components/layout/Header';
@@ -9,15 +9,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CreatePost from './pages/CreatePost';
-
-<Route 
-  path="/create" 
-  element={
-    <ProtectedRoute>
-      <CreatePost />
-    </ProtectedRoute>
-  } 
-/>
+import EditPost from './pages/EditPost';
 
 function App() {
   return (
@@ -61,15 +53,6 @@ function App() {
                 } 
               />
 
-              {/* <Route 
-                path="/profile" 
-                element={
-                  <ProtectedRoute>
-                    <Profile />
-                  </ProtectedRoute>
-                } 
-              />
-              
               <Route 
                 path="/create" 
                 element={
@@ -77,7 +60,16 @@ function App() {
                     <CreatePost />
                   </ProtectedRoute>
                 } 
-              /> */}
+              />
+
+              <Route 
+                path="/edit/:id" 
+                element={
+                  <ProtectedRoute>
+                    <EditPost />
+                  </ProtectedRoute>
+                } 
+              />
             </Routes>
           </main>
 
