@@ -5,6 +5,8 @@ import connectDB from './config/database.js';
 import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
+import debugRoutes from './routes/debugRoutes.js';
+import errorHandler from './middleware/errorMiddleware.js';
 
 // Load environment variables
 dotenv.config();
@@ -36,15 +38,18 @@ app.get('/', (req, res) => {
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
+app.use('/api/debug', debugRoutes);
 
 // Health check endpoint (keep this for testing)
 app.get('/api/health', (req, res) => {
   res.json({ 
     message: 'Server is running!',
     timestamp: new Date(),
-    database: 'Connected'
   });
 });
+
+// Error handling middleware (must be after all routes)
+app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {

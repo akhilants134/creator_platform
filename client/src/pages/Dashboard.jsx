@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import { toast } from 'react-toastify';
 
 const Dashboard = () => {
   const { user, logout, loading } = useAuth();
@@ -28,7 +29,9 @@ const Dashboard = () => {
       setPosts(response.data.data);
       setPagination(response.data.pagination);
     } catch (err) {
-      setError('Failed to load posts');
+      const message = 'Failed to load posts';
+      setError(message);
+      toast.error(message);
       console.error(err);
     } finally {
       setIsLoading(false);
@@ -66,13 +69,13 @@ const Dashboard = () => {
           total: prev.total - 1
         }));
         
-        alert('Post deleted successfully');
+        toast.success('Post deleted successfully');
       }
     } catch (err) {
       console.error('Delete error detail:', err);
       const errorMsg = err.response?.data?.message || err.message || 'Failed to delete post';
       console.error('User-facing error:', errorMsg);
-      alert(errorMsg);
+      toast.error(errorMsg);
     }
   };
 

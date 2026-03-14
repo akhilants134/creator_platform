@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { toast } from 'react-toastify';
 
 const EditPost = () => {
   const { id } = useParams(); // Get post ID from URL
@@ -32,7 +33,9 @@ const EditPost = () => {
       setIsLoading(false);
     } catch (err) {
       console.error('Fetch error:', err);
-      setError(err.response?.data?.message || 'Failed to load post');
+      const message = err.response?.data?.message || 'Failed to load post';
+      setError(message);
+      toast.error(message);
       setIsLoading(false);
     }
   }, [id]);
@@ -59,11 +62,12 @@ const EditPost = () => {
       const response = await api.put(`/api/posts/${id}`, formData);
       
       if (response.data.success) {
+        toast.success('Post updated successfully!');
         // Redirect to dashboard after successful update
         navigate('/dashboard');
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to update post');
+      toast.error(err.response?.data?.message || 'Failed to update post');
       setIsSaving(false);
     }
   };
@@ -81,8 +85,6 @@ const EditPost = () => {
       <div style={formContainerStyle}>
         <h1 style={titleStyle}>Edit Post</h1>
         
-        {error && <div style={errorStyle}>{error}</div>}
-
         <form onSubmit={handleSubmit} style={formStyle}>
           {/* Title */}
           <div style={fieldStyle}>
@@ -255,6 +257,7 @@ const cancelButtonStyle = {
   fontSize: '1rem',
 };
 
+/*
 const errorStyle = {
   padding: '1rem',
   background: '#fff2f2',
@@ -263,6 +266,7 @@ const errorStyle = {
   marginBottom: '2rem',
   textAlign: 'center',
 };
+*/
 
 const loadingStyle = {
   display: 'flex',

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const { login } = useAuth(); // Get login function
@@ -14,7 +15,6 @@ const Login = () => {
   // UI states
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [apiError, setApiError] = useState('');
 
   const navigate = useNavigate();
 
@@ -35,10 +35,6 @@ const Login = () => {
       }));
     }
     
-    // Clear API error when user starts typing
-    if (apiError) {
-      setApiError('');
-    }
   };
 
   const validateForm = () => {
@@ -64,7 +60,6 @@ const Login = () => {
     e.preventDefault();
     
     // Clear previous error
-    setApiError('');
 
     const {email, password} = formData;
 
@@ -86,7 +81,7 @@ const Login = () => {
 
       if (response.status >= 200 && response.status < 300) {
         // Login successful
-        
+        toast.success('Logged in successfully!');
         login(data.user, data.token); // Use context function
 
         // 4. Redirect to dashboard
@@ -94,12 +89,12 @@ const Login = () => {
 
       } else {
         // Login failed
-        setApiError(data.message || 'Login failed. Please try again.');
+        toast.error(data.message || 'Login failed. Please try again.');
       }
 
     } catch (error) {
       console.error('Login error:', error);
-      setApiError('Unable to connect to server. Please try again.');
+      toast.error('Unable to connect to server. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -112,13 +107,6 @@ const Login = () => {
         <p style={subtitleStyle}>
           Login to your {/* Your Platform Name */} account
         </p>
-
-        {/* API Error Message */}
-        {apiError && (
-          <div style={errorMessageStyle}>
-            {apiError}
-          </div>
-        )}
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} style={formStyle}>
@@ -271,15 +259,6 @@ const buttonDisabledStyle = {
   ...buttonStyle,
   backgroundColor: '#6c757d',
   cursor: 'not-allowed',
-};
-
-const errorMessageStyle = {
-  padding: '1rem',
-  backgroundColor: '#f8d7da',
-  color: '#721c24',
-  borderRadius: '5px',
-  marginBottom: '1rem',
-  border: '1px solid #f5c6cb',
 };
 
 const linkTextStyle = {

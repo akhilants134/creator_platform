@@ -14,10 +14,9 @@ export const protect = async (req, res, next) => {
 
     // Check if token exists
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Not authorized, no token'
-      });
+      const error = new Error('Not authorized, no token');
+      error.statusCode = 401;
+      return next(error);
     }
 
     // Verify token
@@ -27,20 +26,19 @@ export const protect = async (req, res, next) => {
     req.user = await User.findById(decoded.userId).select('-password');
 
     if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: 'User not found'
-      });
+      const error = new Error('User not found');
+      error.statusCode = 401;
+      return next(error);
     }
 
     // Continue to next middleware/route
     next();
     
   } catch (error) {
-    console.error('Auth middleware error:', error);
-    return res.status(401).json({
-      success: false,
-      message: 'Not authorized, token failed'
-    });
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      error.statusCode = 401;
+      error.message = 'Not authorized, token failed';
+    }
+    next(error);
   }
 };

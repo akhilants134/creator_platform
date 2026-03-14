@@ -10,12 +10,15 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CreatePost from './pages/CreatePost';
 import EditPost from './pages/EditPost';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <div style={appStyle}>
+          <ToastContainer position="top-right" autoClose={3000} />
           {/* Header appears on all pages */}
           <Header />
 

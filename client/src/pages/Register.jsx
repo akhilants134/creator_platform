@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const Register = () => {
   // Form field states
@@ -13,8 +14,6 @@ const Register = () => {
   // UI states
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [apiError, setApiError] = useState('');
 
   // For navigation after successful registration
   const navigate = useNavigate();
@@ -80,8 +79,6 @@ const Register = () => {
     e.preventDefault(); // Prevent page reload
     
     // Clear previous messages
-    setSuccessMessage('');
-    setApiError('');
 
     // Validate form
     if (!validateForm()) {
@@ -112,7 +109,7 @@ const Register = () => {
 
       if (response.ok) {
         // Registration successful
-        setSuccessMessage('Account created successfully! Redirecting to login...');
+        toast.success('Account created successfully! Redirecting to login...');
         
         // Clear form
         setFormData({
@@ -129,13 +126,13 @@ const Register = () => {
 
       } else {
         // Registration failed - show error from backend
-        setApiError(data.message || 'Registration failed. Please try again.');
+        toast.error(data.message || 'Registration failed. Please try again.');
       }
 
     } catch (error) {
       // Network or other error
       console.error('Registration error:', error);
-      setApiError('Unable to connect to server. Please check your connection and try again.');
+      toast.error('Unable to connect to server. Please check your connection and try again.');
     } finally {
       // Stop loading regardless of success/failure
       setIsLoading(false);
@@ -149,20 +146,6 @@ const Register = () => {
         <p style={subtitleStyle}>
           Join {/* Your Platform Name */} and start creating today
         </p>
-
-        {/* Success Message */}
-        {successMessage && (
-          <div style={successStyle}>
-            {successMessage}
-          </div>
-        )}
-
-        {/* API Error Message */}
-        {apiError && (
-          <div style={errorMessageStyle}>
-            {apiError}
-          </div>
-        )}
 
         {/* Registration Form */}
         <form onSubmit={handleSubmit} style={formStyle}>
@@ -357,23 +340,6 @@ const buttonDisabledStyle = {
   cursor: 'not-allowed',
 };
 
-const successStyle = {
-  padding: '1rem',
-  backgroundColor: '#d4edda',
-  color: '#155724',
-  borderRadius: '5px',
-  marginBottom: '1rem',
-  border: '1px solid #c3e6cb',
-};
-
-const errorMessageStyle = {
-  padding: '1rem',
-  backgroundColor: '#f8d7da',
-  color: '#721c24',
-  borderRadius: '5px',
-  marginBottom: '1rem',
-  border: '1px solid #f5c6cb',
-};
 
 const linkTextStyle = {
   textAlign: 'center',
