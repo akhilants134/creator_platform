@@ -6,6 +6,7 @@ import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import postRoutes from './routes/postRoutes.js';
 import debugRoutes from './routes/debugRoutes.js';
+import analyticsRoutes from './routes/analytics.js';
 import errorHandler from './middleware/errorMiddleware.js';
 
 // Load environment variables
@@ -39,6 +40,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/debug', debugRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Health check endpoint (keep this for testing)
 app.get('/api/health', (req, res) => {

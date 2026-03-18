@@ -1,63 +1,100 @@
 import User from '../models/User.js';
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 
-// @desc    Login user and return JWT
+// Helper function to generate JWT
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN
+  });
+};
+
+// @desc    Register new user
+// @route   POST /api/auth/register
+// @access  Public
+export const registerUser = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    // Check if user already exists
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return res.status(400).json({ success: false, message: 'User already exists' });
+    }
+
+    // Create user
+    const user = await User.create({
+      name,
+      email,
+      password
+    });
+
+    if (user) {
+      res.status(201).json({
+        success: true,
+        message: 'User registered successfully',
+        token: generateToken(user._id),
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        }
+      });
+    }
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Authenticate user & get token
 // @route   POST /api/auth/login
 // @access  Public
-export const loginUser = async (req, res, next) => {
+export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // 1. Validate input
+    // 1. Validate email and password are provided
     if (!email || !password) {
-      const error = new Error('Please provide email and password');
-      error.statusCode = 400;
-      throw error;
+      return res.status(400).json({
+        success: false,
+        error: { message: 'Please provide email and password' }
+      });
     }
 
-    // 2. Find user by email (include password field)
+    // 2. Find user by email and explicitly include password
     const user = await User.findOne({ email }).select('+password');
-
+    
+    // 3. User not found
     if (!user) {
-      const error = new Error('Invalid email or password');
-      error.statusCode = 401;
-      throw error;
+      return res.status(401).json({
+        success: false,
+        error: { message: 'Invalid email or password' }
+      });
     }
 
-    // 3. Compare password with hashed password
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordMatch) {
-      const error = new Error('Invalid email or password');
-      error.statusCode = 401;
-      throw error;
+    // 4. Check if password matches using instance method
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        error: { message: 'Invalid email or password' }
+      });
     }
 
-    // 4. Generate JWT token
-    const token = jwt.sign(
-      { userId: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: process.env.JWT_EXPIRE || '7d' }
-    );
-
-    // 5. Remove password from user object
-    user.password = undefined;
-
-    // 6. Send response with token and user data
+    // 5. Generate and return JWT
     res.status(200).json({
       success: true,
       message: 'Login successful',
-      token,
+      token: generateToken(user._id),
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
-        createdAt: user.createdAt
+        role: user.role
       }
     });
 
   } catch (error) {
-    next(error);
+    res.status(500).json({ success: false, error: { message: 'Login failed', details: error.message } });
   }
 };

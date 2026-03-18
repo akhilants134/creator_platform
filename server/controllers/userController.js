@@ -1,5 +1,5 @@
 import User from '../models/User.js';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 
 // @desc    Register a new user
 // @route   POST /api/users/register
@@ -23,14 +23,11 @@ export const registerUser = async (req, res, next) => {
       throw error;
     }
 
-    // 3. Hash the password for security
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // 4. Create new user with hashed password
+    // 3. Create new user (hashing is handled by User model's pre-save hook)
     const user = await User.create({
       name,
       email,
-      password: hashedPassword
+      password
     });
 
     // 5. Remove password from response

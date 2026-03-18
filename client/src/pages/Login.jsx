@@ -1,15 +1,15 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
-import { toast } from 'react-toastify';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const { login } = useAuth(); // Get login function
   // Form field state
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: "",
+    password: "",
   });
 
   // UI states
@@ -21,20 +21,19 @@ const Login = () => {
   // Handlers will go here
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
 
     // Clear error for this field
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ''
+        [name]: "",
       }));
     }
-    
   };
 
   const validateForm = () => {
@@ -42,14 +41,14 @@ const Login = () => {
 
     // Email validation
     if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+      newErrors.email = "Please enter a valid email";
     }
 
     // Password validation
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     }
 
     setErrors(newErrors);
@@ -58,10 +57,10 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Clear previous error
 
-    const {email, password} = formData;
+    const { email, password } = formData;
 
     // Validate form
     if (!validateForm()) {
@@ -72,29 +71,27 @@ const Login = () => {
 
     try {
       // Send login request
-      const response = await api.post('/api/auth/login', {
+      const response = await api.post("/api/auth/login", {
         email,
-        password
+        password,
       });
 
       const data = response.data;
 
       if (response.status >= 200 && response.status < 300) {
         // Login successful
-        toast.success('Logged in successfully!');
+        toast.success("Logged in successfully!");
         login(data.user, data.token); // Use context function
 
         // 4. Redirect to dashboard
-        navigate('/dashboard');
-
+        navigate("/dashboard");
       } else {
         // Login failed
-        toast.error(data.message || 'Login failed. Please try again.');
+        toast.error(data.message || "Login failed. Please try again.");
       }
-
     } catch (error) {
-      console.error('Login error:', error);
-      toast.error('Unable to connect to server. Please try again.');
+      console.error("Login error:", error);
+      toast.error("Unable to connect to server. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -110,7 +107,6 @@ const Login = () => {
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} style={formStyle}>
-          
           {/* Email Field */}
           <div style={fieldStyle}>
             <label htmlFor="email" style={labelStyle}>
@@ -127,9 +123,7 @@ const Login = () => {
               disabled={isLoading}
               autoComplete="email"
             />
-            {errors.email && (
-              <span style={errorTextStyle}>{errors.email}</span>
-            )}
+            {errors.email && <span style={errorTextStyle}>{errors.email}</span>}
           </div>
 
           {/* Password Field */}
@@ -154,18 +148,18 @@ const Login = () => {
           </div>
 
           {/* Submit Button */}
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             style={isLoading ? buttonDisabledStyle : buttonStyle}
             disabled={isLoading}
           >
-            {isLoading ? 'Logging in...' : 'Login'}
+            {isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
 
         {/* Register Link */}
         <p style={linkTextStyle}>
-          Don't have an account?{' '}
+          Don't have an account?{" "}
           <Link to="/register" style={linkStyle}>
             Sign up here
           </Link>
@@ -176,101 +170,101 @@ const Login = () => {
 };
 
 const containerStyle = {
-  minHeight: '80vh',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  padding: '2rem',
-  backgroundColor: '#f8f9fa',
+  minHeight: "80vh",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: "2rem",
+  backgroundColor: "#f8f9fa",
 };
 
 const formContainerStyle = {
-  maxWidth: '400px',
-  width: '100%',
-  padding: '2.5rem',
-  backgroundColor: 'white',
-  borderRadius: '10px',
-  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+  maxWidth: "400px",
+  width: "100%",
+  padding: "2.5rem",
+  backgroundColor: "white",
+  borderRadius: "10px",
+  boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
 };
 
 const titleStyle = {
-  textAlign: 'center',
-  marginBottom: '0.5rem',
-  color: '#333',
-  fontSize: '2rem',
+  textAlign: "center",
+  marginBottom: "0.5rem",
+  color: "#333",
+  fontSize: "2rem",
 };
 
 const subtitleStyle = {
-  textAlign: 'center',
-  color: '#666',
-  marginBottom: '2rem',
-  fontSize: '0.95rem',
+  textAlign: "center",
+  color: "#666",
+  marginBottom: "2rem",
+  fontSize: "0.95rem",
 };
 
 const formStyle = {
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '1.5rem',
+  display: "flex",
+  flexDirection: "column",
+  gap: "1.5rem",
 };
 
 const fieldStyle = {
-  display: 'flex',
-  flexDirection: 'column',
+  display: "flex",
+  flexDirection: "column",
 };
 
 const labelStyle = {
-  marginBottom: '0.5rem',
-  fontWeight: '500',
-  color: '#333',
-  fontSize: '0.9rem',
+  marginBottom: "0.5rem",
+  fontWeight: "500",
+  color: "#333",
+  fontSize: "0.9rem",
 };
 
 const inputStyle = {
-  padding: '0.75rem',
-  fontSize: '1rem',
-  border: '1px solid #ddd',
-  borderRadius: '5px',
+  padding: "0.75rem",
+  fontSize: "1rem",
+  border: "1px solid #ddd",
+  borderRadius: "5px",
 };
 
 const inputErrorStyle = {
   ...inputStyle,
-  borderColor: '#dc3545',
+  borderColor: "#dc3545",
 };
 
 const errorTextStyle = {
-  color: '#dc3545',
-  fontSize: '0.85rem',
-  marginTop: '0.25rem',
+  color: "#dc3545",
+  fontSize: "0.85rem",
+  marginTop: "0.25rem",
 };
 
 const buttonStyle = {
-  padding: '0.875rem',
-  fontSize: '1rem',
-  fontWeight: 'bold',
-  color: 'white',
-  backgroundColor: '#007bff',
-  border: 'none',
-  borderRadius: '5px',
-  cursor: 'pointer',
-  marginTop: '0.5rem',
+  padding: "0.875rem",
+  fontSize: "1rem",
+  fontWeight: "bold",
+  color: "white",
+  backgroundColor: "#007bff",
+  border: "none",
+  borderRadius: "5px",
+  cursor: "pointer",
+  marginTop: "0.5rem",
 };
 
 const buttonDisabledStyle = {
   ...buttonStyle,
-  backgroundColor: '#6c757d',
-  cursor: 'not-allowed',
+  backgroundColor: "#6c757d",
+  cursor: "not-allowed",
 };
 
 const linkTextStyle = {
-  textAlign: 'center',
-  marginTop: '1.5rem',
-  color: '#666',
+  textAlign: "center",
+  marginTop: "1.5rem",
+  color: "#666",
 };
 
 const linkStyle = {
-  color: '#007bff',
-  textDecoration: 'none',
-  fontWeight: '500',
+  color: "#007bff",
+  textDecoration: "none",
+  fontWeight: "500",
 };
 
 export default Login;

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import api from '../services/api';
 import { toast } from 'react-toastify';
 
 const Register = () => {
@@ -78,8 +79,6 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault(); // Prevent page reload
     
-    // Clear previous messages
-
     // Validate form
     if (!validateForm()) {
       return; // Stop if validation fails
@@ -96,18 +95,10 @@ const Register = () => {
         password: formData.password
       };
 
-      // Send POST request to backend
-      const response = await fetch('/api/users/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(registrationData)
-      });
+      // Send POST request to backend using api utility
+      const response = await api.post('/api/users/register', registrationData);
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.data.success) {
         // Registration successful
         toast.success('Account created successfully! Redirecting to login...');
         
@@ -126,13 +117,14 @@ const Register = () => {
 
       } else {
         // Registration failed - show error from backend
-        toast.error(data.message || 'Registration failed. Please try again.');
+        toast.error(response.data.message || 'Registration failed. Please try again.');
       }
 
     } catch (error) {
       // Network or other error
       console.error('Registration error:', error);
-      toast.error('Unable to connect to server. Please check your connection and try again.');
+      const errorMsg = error.response?.data?.message || 'Unable to connect to server. Please try again.';
+      toast.error(errorMsg);
     } finally {
       // Stop loading regardless of success/failure
       setIsLoading(false);
