@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { toast } from 'react-toastify';
+import ImageUpload from '../components/ImageUpload';
+
 
 const CreatePost = () => {
   const [formData, setFormData] = useState({
@@ -20,6 +22,17 @@ const CreatePost = () => {
       [e.target.name]: e.target.value
     });
   };
+
+  const handleUpload = (formData) => {
+    // In Lesson 4.7, you'll send this formData to the backend
+    // For now, just log it to confirm it works
+    const file = formData.get('image');
+    console.log('FormData ready:', file);
+    if (file) {
+      toast.info(`File "${file.name}" ready for upload!`);
+    }
+  };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,6 +116,13 @@ const CreatePost = () => {
               <option value="published">Published</option>
             </select>
           </div>
+
+          {/* Image Upload Component */}
+          <div style={fieldStyle}>
+            <label>Upload Image</label>
+            <ImageUpload onUpload={handleUpload} />
+          </div>
+
 
           <button 
             type="submit" 
