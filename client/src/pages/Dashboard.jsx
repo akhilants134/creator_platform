@@ -128,6 +128,13 @@ const Dashboard = () => {
                     <span style={badgeStyle(post.category)}>{post.category}</span>
                     <span style={statusBadgeStyle(post.status)}>{post.status}</span>
                   </div>
+                  {post.coverImage && (
+                    <img
+                      src={post.coverImage}
+                      alt={`Cover for ${post.title}`}
+                      style={postImageStyle}
+                    />
+                  )}
                   <h3 style={postTitleStyle}>{post.title}</h3>
                   <p style={contentPreviewStyle}>
                     {post.content.substring(0, 150)}...
@@ -285,6 +292,14 @@ const statusBadgeStyle = (status) => ({
   background: status === 'published' ? '#e1f7e1' : '#fff4e1',
   color: status === 'published' ? '#27ae60' : '#f39c12',
 });
+
+const postImageStyle = {
+  width: '100%',
+  height: '180px',
+  objectFit: 'cover',
+  borderRadius: '12px',
+  marginBottom: '1rem',
+};
 
 const postTitleStyle = {
   fontSize: '1.4rem',

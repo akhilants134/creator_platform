@@ -72,9 +72,10 @@ const Login = () => {
     try {
       // Send login request
       const response = await api.post("/api/auth/login", {
-        email,
+        email: email.trim(),
         password,
       });
+
 
       const data = response.data;
 
@@ -91,8 +92,10 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Login error:", error);
-      toast.error("Unable to connect to server. Please try again.");
+      const errorMsg = error.response?.data?.message || "Unable to connect to server. Please try again.";
+      toast.error(errorMsg);
     } finally {
+
       setIsLoading(false);
     }
   };

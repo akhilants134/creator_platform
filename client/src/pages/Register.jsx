@@ -6,11 +6,13 @@ import { toast } from 'react-toastify';
 const Register = () => {
   // Form field states
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
+
 
   // UI states
   const [errors, setErrors] = useState({});
@@ -40,14 +42,20 @@ const Register = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    // Name validation
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
-    } else if (formData.name.trim().length < 2) {
-      newErrors.name = 'Name must be at least 2 characters';
-    } else if (formData.name.trim().length > 50) {
-      newErrors.name = 'Name cannot exceed 50 characters';
+    // First Name validation
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'First name is required';
+    } else if (formData.firstName.trim().length < 2) {
+      newErrors.firstName = 'First name must be at least 2 characters';
     }
+
+    // Last Name validation
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'Last name is required';
+    } else if (formData.lastName.trim().length < 2) {
+      newErrors.lastName = 'Last name must be at least 2 characters';
+    }
+
 
     // Email validation
     if (!formData.email.trim()) {
@@ -90,10 +98,12 @@ const Register = () => {
     try {
       // Prepare data to send (exclude confirmPassword)
       const registrationData = {
-        name: formData.name.trim(),
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
         email: formData.email.trim().toLowerCase(),
         password: formData.password
       };
+
 
       // Send POST request to backend using api utility
       const response = await api.post('/api/users/register', registrationData);
@@ -104,11 +114,13 @@ const Register = () => {
         
         // Clear form
         setFormData({
-          name: '',
+          firstName: '',
+          lastName: '',
           email: '',
           password: '',
           confirmPassword: ''
         });
+
 
         // Redirect to login page after 2 seconds
         setTimeout(() => {
@@ -136,31 +148,52 @@ const Register = () => {
       <div style={formContainerStyle}>
         <h1 style={titleStyle}>Create Your Account</h1>
         <p style={subtitleStyle}>
-          Join {/* Your Platform Name */} and start creating today
+          Join and start creating today
         </p>
 
         {/* Registration Form */}
         <form onSubmit={handleSubmit} style={formStyle}>
           
-          {/* Name Field */}
+          {/* First Name Field */}
           <div style={fieldStyle}>
-            <label htmlFor="name" style={labelStyle}>
-              Name *
+            <label htmlFor="firstName" style={labelStyle}>
+              First Name *
             </label>
             <input
               type="text"
-              id="name"
-              name="name"
-              value={formData.name}
+              id="firstName"
+              name="firstName"
+              value={formData.firstName}
               onChange={handleChange}
-              placeholder="Enter your full name"
-              style={errors.name ? inputErrorStyle : inputStyle}
+              placeholder="Enter your first name"
+              style={errors.firstName ? inputErrorStyle : inputStyle}
               disabled={isLoading}
             />
-            {errors.name && (
-              <span style={errorTextStyle}>{errors.name}</span>
+            {errors.firstName && (
+              <span style={errorTextStyle}>{errors.firstName}</span>
             )}
           </div>
+
+          {/* Last Name Field */}
+          <div style={fieldStyle}>
+            <label htmlFor="lastName" style={labelStyle}>
+              Last Name *
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              placeholder="Enter your last name"
+              style={errors.lastName ? inputErrorStyle : inputStyle}
+              disabled={isLoading}
+            />
+            {errors.lastName && (
+              <span style={errorTextStyle}>{errors.lastName}</span>
+            )}
+          </div>
+
 
           {/* Email Field */}
           <div style={fieldStyle}>

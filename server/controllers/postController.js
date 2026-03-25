@@ -5,7 +5,7 @@ import Post from '../models/Post.js';
 // @access  Private
 export const createPost = async (req, res, next) => {
   try {
-    const { title, content, category, status } = req.body;
+    const { title, content, category, status, coverImage } = req.body;
 
     // Validate required fields
     if (!title || !content) {
@@ -20,6 +20,7 @@ export const createPost = async (req, res, next) => {
       content,
       category,
       status,
+      coverImage: coverImage || null,
       author: req.user._id // From protect middleware
     });
 

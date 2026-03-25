@@ -4,9 +4,6 @@ import axios from 'axios';
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000',
   timeout: 10000, // 10 second timeout
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 // Request interceptor
@@ -46,12 +43,16 @@ api.interceptors.response.use(
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       
-      // Redirect to login
-      window.location.href = '/login';
+      // Redirect to login ONLY IF we are not already on the login page
+      // to avoid refreshing the page and losing the error message
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
       
       // Show message (optional)
-      console.log('Session expired. Please login again.');
+      console.log('Session expired or invalid credentials.');
     }
+
     
     // Return the error for component to handle
     return Promise.reject(error);

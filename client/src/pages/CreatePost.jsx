@@ -13,6 +13,9 @@ const CreatePost = () => {
     status: 'draft'
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [coverImageUrl, setCoverImageUrl] = useState(null);
+  const [uploadError, setUploadError] = useState('');
   
   const navigate = useNavigate();
 
@@ -23,15 +26,34 @@ const CreatePost = () => {
     });
   };
 
-  const handleUpload = (formData) => {
-    // In Lesson 4.7, you'll send this formData to the backend
-    // For now, just log it to confirm it works
-    const file = formData.get('image');
-    console.log('FormData ready:', file);
-    if (file) {
-      toast.info(`File "${file.name}" ready for upload!`);
+  const handleUpload = async (imageFormData) => {
+    setUploading(true);
+    setUploadError('');
+
+    try {
+      const response = await api.post('/api/upload', imageFormData);
+      // response.data should be: { success: true, url: "...", publicId: "..." }
+
+      if (response.data.success) {
+        setCoverImageUrl(response.data.url);
+        toast.success('Image uploaded successfully!');
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || 'Image upload failed';
+      setUploadError(message);
+      toast.error(message);
+    } finally {
+      setUploading(false);
     }
   };
+
+  /**
+   * TODO: Handle the orphaned upload problem.
+   * Currently, if a user uploads an image but then changes it or cancels the post,
+   * the old image remains on Cloudinary. Future improvement: delete the old image
+   * using its public_id before setting a new coverImageUrl or on component unmount
+   * if the post wasn't created.
+   */
 
 
   const handleSubmit = async (e) => {
@@ -39,7 +61,12 @@ const CreatePost = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.post('/api/posts', formData);
+      const postData = {
+        ...formData,
+        coverImage: coverImageUrl // This is null if no image was uploaded
+      };
+
+      const response = await api.post('/api/posts', postData);
       
       if (response.data.success) {
         toast.success('Post created successfully!');
@@ -124,12 +151,16 @@ const CreatePost = () => {
           </div>
 
 
+          {/* Upload Status & Error */}
+          {uploading && <p style={{ color: '#4a90e2' }}>Uploading image, please wait...</p>}
+          {uploadError && <p style={{ color: '#d63031' }}>{uploadError}</p>}
+
           <button 
             type="submit" 
-            disabled={isLoading}
+            disabled={isLoading || uploading}
             style={buttonStyle}
           >
-            {isLoading ? 'Creating...' : 'Create Post'}
+            {isLoading ? 'Creating...' : (uploading ? 'Uploading Image...' : 'Create Post')}
           </button>
         </form>
       </div>

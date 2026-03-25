@@ -1,19 +1,39 @@
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+
+// Helper function to generate JWT
+const generateToken = (id) => {
+  return jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || '30d'
+  });
+};
+
 
 // @desc    Register a new user
 // @route   POST /api/users/register
 // @access  Public
 export const registerUser = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, firstName: rFirstName, lastName: rLastName, email, password } = req.body;
 
     // 1. Validate all required fields are provided
-    if (!name || !email || !password) {
-      const error = new Error('Please provide all required fields: name, email, and password');
+    if ((!name && !rFirstName) || !email || !password) {
+      const error = new Error('Please provide all required fields');
       error.statusCode = 400;
       throw error;
     }
+
+    // Determine firstName and lastName
+    let firstName = rFirstName;
+    let lastName = rLastName;
+
+    if (!firstName && name) {
+      const nameParts = name.trim().split(' ');
+      firstName = nameParts[0];
+      lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : ' ';
+    }
+
 
     // 2. Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -25,10 +45,12 @@ export const registerUser = async (req, res, next) => {
 
     // 3. Create new user (hashing is handled by User model's pre-save hook)
     const user = await User.create({
-      name,
+      firstName,
+      lastName,
       email,
       password
     });
+
 
     // 5. Remove password from response
     user.password = undefined;
@@ -37,8 +59,16 @@ export const registerUser = async (req, res, next) => {
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
-      data: user
+      token: generateToken(user._id),
+      data: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role
+      }
     });
+
 
   } catch (error) {
     next(error);
@@ -97,7 +127,7 @@ export const getUserById = async (req, res, next) => {
 export const updateUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { name, email } = req.body;
+    const { name, firstName: rFirstName, lastName: rLastName, email } = req.body;
 
     // Find user
     const user = await User.findById(id);
@@ -109,8 +139,18 @@ export const updateUser = async (req, res, next) => {
     }
 
     // Update fields if provided
-    if (name) user.name = name;
+
+    if (rFirstName) user.firstName = rFirstName;
+    if (rLastName) user.lastName = rLastName;
+    
+    if (!rFirstName && name) {
+      const nameParts = name.trim().split(' ');
+      user.firstName = nameParts[0];
+      user.lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : ' ';
+    }
     if (email) user.email = email;
+
+
 
     // Save updated user
     await user.save();
