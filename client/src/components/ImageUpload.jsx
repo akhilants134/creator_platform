@@ -63,9 +63,7 @@ const ImageUpload = ({ onUpload }) => {
   }, [previewUrl]);
 
   // Part 6: Build the FormData on Submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
+  const handleInternalSubmit = () => {
     if (!selectedFile) {
       setError('Please select an image first');
       return;
@@ -83,7 +81,7 @@ const ImageUpload = ({ onUpload }) => {
 
   return (
     <div className="image-upload-container" style={{ margin: '20px 0', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
-      <form onSubmit={handleSubmit}>
+      <div className="image-upload-content">
         <div style={{ marginBottom: '15px' }}>
           <label htmlFor="image-input" style={{ display: 'block', marginBottom: '10px', fontWeight: 'bold' }}>
             Select Image:
@@ -117,7 +115,8 @@ const ImageUpload = ({ onUpload }) => {
 
         {/* Part 6: Add the Submit Button */}
         <button
-          type="submit"
+          type="button"
+          onClick={handleInternalSubmit}
           disabled={!selectedFile || !!error}
           style={{
             padding: '10px 20px',
@@ -131,7 +130,7 @@ const ImageUpload = ({ onUpload }) => {
         >
           Upload Image
         </button>
-      </form>
+      </div>
     </div>
   );
 };

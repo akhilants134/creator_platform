@@ -1,5 +1,5 @@
+import 'dotenv/config';
 import express from 'express';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import connectDB from './config/database.js';
 import userRoutes from './routes/userRoutes.js';
@@ -10,8 +10,7 @@ import analyticsRoutes from './routes/analytics.js';
 import uploadRoutes from './routes/upload.js';
 import errorHandler from './middleware/errorMiddleware.js';
 
-// Load environment variables
-dotenv.config();
+// Connect to database
 
 // Connect to database
 connectDB();

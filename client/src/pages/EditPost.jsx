@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { toast } from 'react-toastify';
+import ImageUpload from '../components/ImageUpload';
 
 const EditPost = () => {
   const { id } = useParams(); // Get post ID from URL
@@ -15,6 +16,9 @@ const EditPost = () => {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [coverImageUrl, setCoverImageUrl] = useState(null);
+  const [uploadError, setUploadError] = useState('');
   const [error, setError] = useState('');
 
   const fetchPost = useCallback(async () => {
@@ -29,6 +33,7 @@ const EditPost = () => {
         category: post.category,
         status: post.status
       });
+      setCoverImageUrl(post.coverImage);
       
       setIsLoading(false);
     } catch (err) {
@@ -42,7 +47,6 @@ const EditPost = () => {
 
   // Fetch post data when component mounts
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchPost();
   }, [fetchPost]);
 
@@ -53,13 +57,36 @@ const EditPost = () => {
     });
   };
 
+  const handleUpload = async (imageFormData) => {
+    setUploading(true);
+    setUploadError('');
+
+    try {
+      const response = await api.post('/api/upload', imageFormData);
+      if (response.data.success) {
+        setCoverImageUrl(response.data.url);
+        toast.success('Image updated successfully!');
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || 'Image upload failed';
+      setUploadError(message);
+      toast.error(message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setIsSaving(true);
 
     try {
-      const response = await api.put(`/api/posts/${id}`, formData);
+      const updateData = {
+        ...formData,
+        coverImage: coverImageUrl
+      };
+      const response = await api.put(`/api/posts/${id}`, updateData);
       
       if (response.data.success) {
         toast.success('Post updated successfully!');
@@ -142,6 +169,22 @@ const EditPost = () => {
             </select>
           </div>
 
+          {/* Image Upload Component */}
+          <div style={fieldStyle}>
+            <label style={labelStyle}>Update Image</label>
+            <ImageUpload onUpload={handleUpload} />
+            {coverImageUrl && (
+              <div style={{ marginTop: '1rem' }}>
+                <p style={labelStyle}>Current Image:</p>
+                <img src={coverImageUrl} alt="Current cover" style={{ width: '200px', borderRadius: '8px' }} />
+              </div>
+            )}
+          </div>
+
+          {/* Upload Status & Error */}
+          {uploading && <p style={{ color: '#4a90e2' }}>Uploading image, please wait...</p>}
+          {uploadError && <p style={{ color: '#d63031' }}>{uploadError}</p>}
+
           {/* Action Buttons */}
           <div style={buttonGroupStyle}>
             <button 
@@ -153,7 +196,7 @@ const EditPost = () => {
             </button>
             <button 
               type="submit" 
-              disabled={isSaving}
+              disabled={isSaving || uploading}
               style={submitButtonStyle}
             >
               {isSaving ? 'Saving...' : 'Update Post'}

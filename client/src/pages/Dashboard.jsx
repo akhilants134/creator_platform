@@ -140,6 +140,7 @@ const Dashboard = () => {
                     {post.content.substring(0, 150)}...
                   </p>
                   <div style={metaStyle}>
+                    <span title={post.author?.email}>👤 {post.author?.name || 'Unknown'}</span>
                     <span>📅 {new Date(post.createdAt).toLocaleDateString()}</span>
                   </div>
 
@@ -320,6 +321,9 @@ const metaStyle = {
   color: '#b2bec3',
   borderTop: '1px solid #f1f1f1',
   paddingTop: '1rem',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
 };
 
 const paginationStyle = {
