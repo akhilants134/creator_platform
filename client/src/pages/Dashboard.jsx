@@ -1,8 +1,30 @@
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
 
 const Dashboard = () => {
   const { user, loading, logout } = useAuth();
+  const [usersCount, setUsersCount] = useState(null);
+  const [requestError, setRequestError] = useState("");
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await api.get("/api/users");
+        setUsersCount(response.data.count ?? 0);
+      } catch (error) {
+        setRequestError(
+          error.response?.data?.message ||
+            "Could not load protected data. Please try again.",
+        );
+      }
+    };
+
+    if (user) {
+      fetchUsers();
+    }
+  }, [user]);
 
   if (loading) {
     return <div style={centerStyle}>Loading...</div>;
@@ -25,6 +47,12 @@ const Dashboard = () => {
           <li>Current Streak: 5 Days</li>
           <li>Next Goal: 100kg Squat</li>
         </ul>
+        {usersCount !== null ? (
+          <p style={metricStyle}>
+            Protected users endpoint count: {usersCount}
+          </p>
+        ) : null}
+        {requestError ? <p style={errorStyle}>{requestError}</p> : null}
       </div>
 
       <button type="button" onClick={logout} style={logoutBtnStyle}>
@@ -55,6 +83,16 @@ const cardStyle = {
   padding: "2rem",
   borderRadius: "8px",
   marginTop: "2rem",
+};
+
+const metricStyle = {
+  marginTop: "1rem",
+  fontWeight: 600,
+};
+
+const errorStyle = {
+  marginTop: "1rem",
+  color: "#dc3545",
 };
 
 const logoutBtnStyle = {

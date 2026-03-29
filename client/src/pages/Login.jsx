@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
@@ -26,22 +27,17 @@ const Login = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch("/api/users/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
-      }
+      const response = await api.post("/api/users/login", formData);
+      const data = response.data;
 
       login(data.user, data.token);
       navigate("/dashboard");
     } catch (submitError) {
-      setError(submitError.message || "Unable to login right now.");
+      setError(
+        submitError.response?.data?.message ||
+          submitError.message ||
+          "Unable to login right now.",
+      );
     } finally {
       setIsSubmitting(false);
     }

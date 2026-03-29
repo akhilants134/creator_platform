@@ -177,6 +177,13 @@ export const updateUser = async (req, res) => {
     const { id } = req.params;
     const { name, email } = req.body;
 
+    if (req.user.id !== id) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only update your own profile",
+      });
+    }
+
     // Find user
     const user = await User.findById(id);
 
@@ -217,6 +224,13 @@ export const updateUser = async (req, res) => {
 export const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
+
+    if (req.user.id !== id) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only delete your own profile",
+      });
+    }
 
     // Find and delete user
     const user = await User.findByIdAndDelete(id);
