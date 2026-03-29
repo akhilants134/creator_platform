@@ -58,9 +58,8 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Clear previous error
-
-    const { email, password } = formData;
+    const email = formData.email.trim().toLowerCase();
+    const { password } = formData;
 
     // Validate form
     if (!validateForm()) {
@@ -79,6 +78,11 @@ const Login = () => {
       const data = response.data;
 
       if (response.status >= 200 && response.status < 300) {
+        if (!data?.token || !data?.user) {
+          toast.error("Login response is missing token or user data.");
+          return;
+        }
+
         // Login successful
         toast.success("Logged in successfully!");
         login(data.user, data.token); // Use context function
@@ -87,11 +91,15 @@ const Login = () => {
         navigate("/dashboard");
       } else {
         // Login failed
-        toast.error(data.message || "Login failed. Please try again.");
+        toast.error(data?.message || "Login failed. Please try again.");
       }
     } catch (error) {
       console.error("Login error:", error);
-      toast.error("Unable to connect to server. Please try again.");
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error?.message ||
+        "Unable to connect to server. Please try again.";
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }

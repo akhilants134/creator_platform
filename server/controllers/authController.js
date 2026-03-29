@@ -1,11 +1,19 @@
-import User from '../models/User.js';
-import jwt from 'jsonwebtoken';
+import User from "../models/User.js";
+import jwt from "jsonwebtoken";
 
 // Helper function to generate JWT
 const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN
+  return jwt.sign({ userId: id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE || process.env.JWT_EXPIRES_IN || "7d",
   });
+};
+
+const getUserDisplayName = (user) => {
+  if (user.name) return user.name;
+  const firstName = user.firstName || "";
+  const lastName = user.lastName || "";
+  const fullName = `${firstName} ${lastName}`.trim();
+  return fullName || user.email;
 };
 
 // @desc    Register new user
@@ -18,27 +26,29 @@ export const registerUser = async (req, res) => {
     // Check if user already exists
     const userExists = await User.findOne({ email });
     if (userExists) {
-      return res.status(400).json({ success: false, message: 'User already exists' });
+      return res
+        .status(400)
+        .json({ success: false, message: "User already exists" });
     }
 
     // Create user
     const user = await User.create({
       name,
       email,
-      password
+      password,
     });
 
     if (user) {
       res.status(201).json({
         success: true,
-        message: 'User registered successfully',
+        message: "User registered successfully",
         token: generateToken(user._id),
         user: {
           id: user._id,
           name: user.name,
           email: user.email,
-          role: user.role
-        }
+          role: user.role,
+        },
       });
     }
   } catch (error) {
@@ -52,23 +62,26 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = email?.trim().toLowerCase();
 
     // 1. Validate email and password are provided
-    if (!email || !password) {
+    if (!normalizedEmail || !password) {
       return res.status(400).json({
         success: false,
-        error: { message: 'Please provide email and password' }
+        message: "Please provide email and password",
       });
     }
 
     // 2. Find user by email and explicitly include password
-    const user = await User.findOne({ email }).select('+password');
-    
+    const user = await User.findOne({ email: normalizedEmail }).select(
+      "+password",
+    );
+
     // 3. User not found
     if (!user) {
       return res.status(401).json({
         success: false,
-        error: { message: 'Invalid email or password' }
+        message: "Invalid email or password",
       });
     }
 
@@ -77,24 +90,26 @@ export const loginUser = async (req, res) => {
     if (!isMatch) {
       return res.status(401).json({
         success: false,
-        error: { message: 'Invalid email or password' }
+        message: "Invalid email or password",
       });
     }
 
     // 5. Generate and return JWT
     res.status(200).json({
       success: true,
-      message: 'Login successful',
+      message: "Login successful",
       token: generateToken(user._id),
       user: {
         id: user._id,
-        name: user.name,
+        name: getUserDisplayName(user),
         email: user.email,
-        role: user.role
-      }
+        role: user.role,
+        createdAt: user.createdAt,
+      },
     });
-
   } catch (error) {
-    res.status(500).json({ success: false, error: { message: 'Login failed', details: error.message } });
+    res
+      .status(500)
+      .json({ success: false, message: "Login failed", error: error.message });
   }
 };

@@ -3,6 +3,22 @@ import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext(null);
 
+const isTokenExpired = (token) => {
+  if (!token) return true;
+
+  try {
+    const payloadBase64 = token.split(".")[1];
+    const payload = JSON.parse(atob(payloadBase64));
+
+    if (!payload.exp) return false;
+
+    const currentTime = Date.now() / 1000;
+    return payload.exp < currentTime;
+  } catch (error) {
+    return true;
+  }
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(null);
@@ -16,9 +32,14 @@ export const AuthProvider = ({ children }) => {
 
     if (storedToken && storedUser) {
       try {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setToken(storedToken);
-        setUser(JSON.parse(storedUser));
+        if (isTokenExpired(storedToken)) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+        } else {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
+          setToken(storedToken);
+          setUser(JSON.parse(storedUser));
+        }
       } catch (error) {
         console.error("Error parsing user data:", error);
         localStorage.removeItem("token");
@@ -31,6 +52,12 @@ export const AuthProvider = ({ children }) => {
 
   // Login function
   const login = (userData, userToken) => {
+    if (isTokenExpired(userToken)) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      return;
+    }
+
     // Update state
     setUser(userData);
     setToken(userToken);
@@ -56,7 +83,7 @@ export const AuthProvider = ({ children }) => {
 
   // Check if authenticated
   const isAuthenticated = () => {
-    return !!token && !!user;
+    return !!token && !!user && !isTokenExpired(token);
   };
 
   const value = {
