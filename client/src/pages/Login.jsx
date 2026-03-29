@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const Login = () => {
@@ -7,7 +7,8 @@ const Login = () => {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
-  const { login, loading, user, token } = useAuth();
+  const location = useLocation();
+  const { login } = useAuth();
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -39,17 +40,14 @@ const Login = () => {
       }
 
       login(data.user, data.token);
-      navigate("/dashboard");
+      const from = location.state?.from?.pathname || "/dashboard";
+      navigate(from, { replace: true });
     } catch (submitError) {
       setError(submitError.message || "Unable to login right now.");
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  if (!loading && user && token) {
-    return <Navigate to="/dashboard" replace />;
-  }
 
   return (
     <div style={formWrapper}>

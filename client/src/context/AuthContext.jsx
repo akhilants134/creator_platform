@@ -3,23 +3,32 @@ import { createContext, useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const AuthContext = createContext(null);
+
+const getInitialAuthState = () => {
+  const storedToken = localStorage.getItem("token");
+  const storedUser = localStorage.getItem("user");
+
+  if (!storedToken || !storedUser) {
+    // Keep storage consistent if one value is missing.
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    return { user: null, token: null };
+  }
+
+  try {
+    return { user: JSON.parse(storedUser), token: storedToken };
+  } catch (error) {
+    console.error("Error parsing stored user data:", error);
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    return { user: null, token: null };
+  }
+};
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const storedUser = localStorage.getItem("user");
-
-    if (!storedUser) {
-      return null;
-    }
-
-    try {
-      return JSON.parse(storedUser);
-    } catch (error) {
-      console.error("Error parsing stored user data:", error);
-      localStorage.removeItem("user");
-      return null;
-    }
-  });
-  const [token, setToken] = useState(() => localStorage.getItem("token"));
+  const [initialAuthState] = useState(getInitialAuthState);
+  const [user, setUser] = useState(initialAuthState.user);
+  const [token, setToken] = useState(initialAuthState.token);
   const [loading] = useState(false);
   const navigate = useNavigate();
 
