@@ -1,32 +1,41 @@
-// server/server.js
-import express from 'express';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import mongoose from 'mongoose';
+import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import connectDB from "./config/database.js";
+import userRoutes from "./routes/userRoutes.js";
+import errorHandler from "./middleware/errorMiddleware.js";
 
 dotenv.config();
+connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// Middleware
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    credentials: true,
+    optionsSuccessStatus: 200,
+  }),
+);
 app.use(express.json());
 
-// Enhanced Connection Logic
-const dbURI = process.env.MONGO_URI;
+// Routes
+app.use("/api/users", userRoutes);
 
-if (!dbURI) {
-  console.error('ERROR: MONGO_URI is not defined in your .env file!');
-} else {
-  mongoose.connect(dbURI)
-    .then(() => console.log('Connected to MongoDB'))
-    .catch((err) => console.error('MongoDB connection error:', err.message));
-}
-
-app.get('/api/health', (req, res) => {
-  res.json({ message: 'FitTracker Server is healthy!' });
+// Health check
+app.get("/api/health", (req, res) => {
+  res.json({
+    message: "Server is running!",
+    timestamp: new Date(),
+    database: "Connected",
+  });
 });
 
+// Error handling middleware
+app.use(errorHandler);
+
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Server running on http://localhost:${PORT}`);
 });
