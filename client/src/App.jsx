@@ -2,10 +2,12 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
 import { AuthProvider } from "./context/AuthContext";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
+import Home from "./pages/Home.jsx";
+import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
+import Dashboard from "./pages/Dashboard.jsx";
+import CreatePost from "./pages/CreatePost.jsx";
+import EditPost from "./pages/EditPost.jsx";
 
 function App() {
   return (
@@ -19,6 +21,8 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/create-post" element={<CreatePost />} />
+              <Route path="/edit-post/:id" element={<EditPost />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

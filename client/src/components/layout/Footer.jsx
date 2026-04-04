@@ -2,7 +2,7 @@ const Footer = () => {
   return (
     <footer style={footerStyle}>
       <div style={containerStyle}>
-        <p>&copy; 2026 FitTracker. All rights reserved.</p>
+        <p>&copy; 2026 BlogHub. All rights reserved.</p>
         <p>Built by Akhilan</p>
       </div>
     </footer>

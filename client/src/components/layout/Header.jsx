@@ -9,7 +9,7 @@ const Header = () => {
       <div style={containerStyle}>
         <h1 style={logoStyle}>
           <Link to="/" style={linkStyle}>
-            FitTracker
+            BlogHub
           </Link>
         </h1>
         <nav style={navStyle}>

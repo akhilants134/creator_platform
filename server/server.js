@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import mongoose from "mongoose";
 import userRoutes from "./routes/userRoutes.js";
+import postRoutes from "./routes/postRoutes.js";
 
 dotenv.config();
 
@@ -31,10 +32,11 @@ if (!dbURI) {
 }
 
 app.get("/api/health", (req, res) => {
-  res.json({ message: "FitTracker Server is healthy!" });
+  res.json({ message: "BlogHub Server is healthy!" });
 });
 
 app.use("/api/users", userRoutes);
+app.use("/api/posts", postRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
