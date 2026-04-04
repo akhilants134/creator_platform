@@ -31,6 +31,10 @@ if (!dbURI) {
     .catch((err) => console.error("MongoDB connection error:", err.message));
 }
 
+app.get("/", (req, res) => {
+  res.send("Welcome to the Creator Platform API! 🚀");
+});
+
 app.get("/api/health", (req, res) => {
   res.json({ message: "BlogHub Server is healthy!" });
 });
