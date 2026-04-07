@@ -9,8 +9,8 @@ services:
     volumes:
       - mongo-data:/data/db
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
 
   server:
     build:
@@ -19,13 +19,10 @@ services:
     container_name: creator-platform-server
     ports:
       - "5000:5000"
-    environment:
-      MONGO_URI: mongodb://admin:password123@mongo:27017/creator-platform?authSource=admin
-      CLIENT_URL: http://localhost:3000
-      JWT_SECRET: ${JWT_SECRET}
-      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
-      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
-      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+    # Option 2: use separate env files; .env.docker overrides local values for container networking (mongo hostname).
+    env_file:
+      - ./server/.env
+      - ./server/.env.docker
     depends_on:
       - mongo
 
