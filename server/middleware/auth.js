@@ -33,6 +33,17 @@ export const protect = async (req, res, next) => {
       });
     }
 
+    if (
+      req.user.passwordChangedAt &&
+      decoded.iat <
+        Math.floor(new Date(req.user.passwordChangedAt).getTime() / 1000)
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: "Token is no longer valid. Please log in again.",
+      });
+    }
+
     next();
   } catch (error) {
     return res.status(401).json({

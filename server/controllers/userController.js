@@ -1,6 +1,9 @@
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
+
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
 
 const generateToken = (userId) => {
   return jwt.sign(
@@ -8,6 +11,10 @@ const generateToken = (userId) => {
     process.env.JWT_SECRET || "dev-secret-change-me",
     { expiresIn: "7d" },
   );
+};
+
+const hashResetToken = (token) => {
+  return crypto.createHash("sha256").update(token).digest("hex");
 };
 
 // @desc    Login user
@@ -293,6 +300,7 @@ export const changePassword = async (req, res) => {
     }
 
     user.password = await bcrypt.hash(newPassword, 10);
+    user.passwordChangedAt = new Date();
     await user.save();
 
     return res.status(200).json({
@@ -303,6 +311,125 @@ export const changePassword = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Error changing password",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Request password reset link
+// @route   POST /api/users/forgot-password
+// @access  Public
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const normalizedEmail = email.trim().toLowerCase();
+    const user = await User.findOne({ email: normalizedEmail });
+
+    if (!user) {
+      return res.status(200).json({
+        success: true,
+        message: "If that email exists, a password reset link has been sent.",
+      });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    user.resetPasswordToken = hashResetToken(resetToken);
+    user.resetPasswordExpires = new Date(Date.now() + RESET_TOKEN_TTL_MS);
+    await user.save();
+
+    const resetUrl = `${process.env.CLIENT_URL || "http://localhost:5173"}/reset-password/${resetToken}`;
+
+    console.log("\n=== PASSWORD RESET LINK ===");
+    console.log(`Email: ${user.email}`);
+    console.log(`Reset link: ${resetUrl}`);
+    console.log("===========================\n");
+
+    return res.status(200).json({
+      success: true,
+      message: "If that email exists, a password reset link has been sent.",
+      ...(process.env.NODE_ENV !== "production"
+        ? { devToken: resetToken, resetUrl }
+        : {}),
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error requesting password reset",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Validate a password reset token
+// @route   GET /api/users/reset/:token
+// @access  Public
+export const verifyResetToken = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const hashedToken = hashResetToken(token);
+
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired reset token",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Reset token is valid",
+      email: user.email,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error verifying reset token",
+      error: error.message,
+    });
+  }
+};
+
+// @desc    Reset password using token
+// @route   POST /api/users/reset/:token
+// @access  Public
+export const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+    const hashedToken = hashResetToken(token);
+
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpires: { $gt: new Date() },
+    });
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid or expired reset token",
+      });
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10);
+    user.password = passwordHash;
+    user.passwordChangedAt = new Date();
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successful. You can now log in.",
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Error resetting password",
       error: error.message,
     });
   }

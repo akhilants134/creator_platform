@@ -1,9 +1,9 @@
-import Post from '../models/Post.js';
+import Post from "../models/Post.js";
 
 // @desc    Create a new post
 // @route   POST /api/posts
 // @access  Private
-export const createPost = async (req, res) => {
+export const createPost = (io) => async (req, res) => {
   try {
     const { title, content, category } = req.body;
     const author = req.user._id;
@@ -17,6 +17,18 @@ export const createPost = async (req, res) => {
     });
 
     const createdPost = await post.save();
+
+    if (io) {
+      io.emit("newPost", {
+        message: `New post created by ${req.user.name}`,
+        post: {
+          _id: createdPost._id,
+          title: createdPost.title,
+          createdBy: req.user.name,
+        },
+      });
+    }
+
     res.status(201).json({
       success: true,
       message: "Post created successfully",
@@ -36,7 +48,9 @@ export const createPost = async (req, res) => {
 // @access  Public
 export const getPosts = async (req, res) => {
   try {
-    const posts = await Post.find().populate('author', 'name email').sort({ createdAt: -1 });
+    const posts = await Post.find()
+      .populate("author", "name email")
+      .sort({ createdAt: -1 });
     res.status(200).json({
       success: true,
       count: posts.length,
@@ -56,7 +70,10 @@ export const getPosts = async (req, res) => {
 // @access  Public
 export const getPostById = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id).populate('author', 'name email');
+    const post = await Post.findById(req.params.id).populate(
+      "author",
+      "name email",
+    );
     if (!post) {
       return res.status(404).json({
         success: false,
