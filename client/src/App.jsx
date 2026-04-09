@@ -13,11 +13,12 @@ import Dashboard from "./pages/Dashboard.jsx";
 import CreatePost from "./pages/CreatePost.jsx";
 import EditPost from "./pages/EditPost.jsx";
 import { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 
 // Component that manages socket connection based on auth state
 const SocketManager = ({ children }) => {
   const { token } = useAuth();
-  const { connectSocket, disconnectSocket } = useSocket();
+  const { socket, connectSocket, disconnectSocket } = useSocket();
 
   useEffect(() => {
     if (token) {
@@ -26,6 +27,29 @@ const SocketManager = ({ children }) => {
       disconnectSocket();
     }
   }, [token, connectSocket, disconnectSocket]);
+
+  useEffect(() => {
+    if (!token) {
+      return undefined;
+    }
+
+    if (!socket) {
+      return undefined;
+    }
+
+    const handleNewPost = (payload) => {
+      const toastId = payload?.post?._id || payload?.message;
+      toast.success(payload?.message || "New post created", {
+        id: toastId,
+      });
+    };
+
+    socket.on("newPost", handleNewPost);
+
+    return () => {
+      socket.off("newPost", handleNewPost);
+    };
+  }, [token, socket]);
 
   return children;
 };

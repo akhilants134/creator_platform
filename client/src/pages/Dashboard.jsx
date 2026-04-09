@@ -1,14 +1,11 @@
 import { useEffect, useState } from "react";
 import { Navigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { useSocket } from "../context/SocketContext";
 import api from "../services/api";
 import PostCard from "../components/posts/PostCard";
-import toast from "react-hot-toast";
 
 const Dashboard = () => {
   const { user, loading, logout } = useAuth();
-  const { socket } = useSocket();
   const [posts, setPosts] = useState([]);
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [requestError, setRequestError] = useState("");
@@ -37,23 +34,6 @@ const Dashboard = () => {
       fetchPosts();
     }
   }, [user]);
-
-  // Listen to newPost events from socket (persists across navigation)
-  useEffect(() => {
-    if (!socket) {
-      return undefined;
-    }
-
-    const handleNewPost = (data) => {
-      toast.success(data.message);
-    };
-
-    socket.on("newPost", handleNewPost);
-
-    return () => {
-      socket.off("newPost", handleNewPost);
-    };
-  }, [socket]);
 
   const handleDeletePost = async (id) => {
     if (window.confirm("Are you sure you want to delete this post?")) {
