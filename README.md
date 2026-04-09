@@ -27,6 +27,11 @@ Create a `.env` file in `server/` based on `.env.example` with values for:
 - `MONGO_URI` for local server runs
 - `CLIENT_URL` if your frontend runs on a different origin
 
+At the repo root, you can also define Docker host ports in `.env`:
+
+- `SERVER_HOST_PORT` (default: `5001`)
+- `CLIENT_HOST_PORT` (default: `3000`)
+
 ## Install Dependencies
 
 ```bash
@@ -56,6 +61,13 @@ npm run client
 ```bash
 docker compose up --build
 ```
+
+By default, Docker maps:
+
+- API: `http://localhost:5001`
+- Frontend: `http://localhost:3000`
+
+This keeps `localhost:5000` available for local `npm run dev` in `server/`.
 
 ## API Overview
 

@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
 import { Navigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useSocket } from "../context/SocketContext";
 import api from "../services/api";
 import PostCard from "../components/posts/PostCard";
-import socket from "../services/socket";
 import toast from "react-hot-toast";
 
 const Dashboard = () => {
   const { user, loading, logout } = useAuth();
+  const { socket } = useSocket();
   const [posts, setPosts] = useState([]);
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [requestError, setRequestError] = useState("");
@@ -37,45 +38,22 @@ const Dashboard = () => {
     }
   }, [user]);
 
+  // Listen to newPost events from socket (persists across navigation)
   useEffect(() => {
-    if (!user) {
+    if (!socket) {
       return undefined;
     }
-
-    socket.auth = {
-      token: localStorage.getItem("token"),
-    };
-
-    const handleConnect = () => {
-      console.log(`Socket connected: ${socket.id}`);
-    };
-
-    const handleDisconnect = () => {
-      console.log("Socket disconnected");
-    };
-
-    const handleConnectError = (error) => {
-      console.error("Socket auth error:", error.message);
-    };
 
     const handleNewPost = (data) => {
       toast.success(data.message);
     };
 
-    socket.on("connect", handleConnect);
-    socket.on("disconnect", handleDisconnect);
-    socket.on("connect_error", handleConnectError);
     socket.on("newPost", handleNewPost);
-    socket.connect();
 
     return () => {
-      socket.off("connect", handleConnect);
-      socket.off("disconnect", handleDisconnect);
-      socket.off("connect_error", handleConnectError);
       socket.off("newPost", handleNewPost);
-      socket.disconnect();
     };
-  }, [user]);
+  }, [socket]);
 
   const handleDeletePost = async (id) => {
     if (window.confirm("Are you sure you want to delete this post?")) {

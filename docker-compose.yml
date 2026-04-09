@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   mongo:
     image: mongo:latest
@@ -18,7 +16,7 @@ services:
       dockerfile: Dockerfile
     container_name: creator-platform-server
     ports:
-      - "5000:5000"
+      - "${SERVER_HOST_PORT:-5001}:5000"
     # Option 2: use separate env files; .env.docker overrides local values for container networking (mongo hostname).
     env_file:
       - ./server/.env
@@ -32,7 +30,7 @@ services:
       dockerfile: Dockerfile
     container_name: creator-platform-client
     ports:
-      - "3000:80"
+      - "${CLIENT_HOST_PORT:-3000}:80"
     depends_on:
       - server
 

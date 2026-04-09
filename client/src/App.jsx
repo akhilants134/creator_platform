@@ -1,7 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useEffect } from "react";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
+import { SocketProvider, useSocket } from "./context/SocketContext";
 import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
 import Register from "./pages/Register.jsx";
@@ -12,31 +14,51 @@ import CreatePost from "./pages/CreatePost.jsx";
 import EditPost from "./pages/EditPost.jsx";
 import { Toaster } from "react-hot-toast";
 
+// Component that manages socket connection based on auth state
+const SocketManager = ({ children }) => {
+  const { token } = useAuth();
+  const { connectSocket, disconnectSocket } = useSocket();
+
+  useEffect(() => {
+    if (token) {
+      connectSocket(token);
+    } else {
+      disconnectSocket();
+    }
+  }, [token, connectSocket, disconnectSocket]);
+
+  return children;
+};
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <div style={appStyle}>
-          <Toaster position="top-right" />
-          <Header />
-          <main style={mainStyle}>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route
-                path="/reset-password/:token"
-                element={<ResetPassword />}
-              />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/create-post" element={<CreatePost />} />
-              <Route path="/edit-post/:id" element={<EditPost />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
+        <SocketProvider>
+          <SocketManager>
+            <div style={appStyle}>
+              <Toaster position="top-right" />
+              <Header />
+              <main style={mainStyle}>
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route
+                    path="/reset-password/:token"
+                    element={<ResetPassword />}
+                  />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/create-post" element={<CreatePost />} />
+                  <Route path="/edit-post/:id" element={<EditPost />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </main>
+              <Footer />
+            </div>
+          </SocketManager>
+        </SocketProvider>
       </AuthProvider>
     </BrowserRouter>
   );
