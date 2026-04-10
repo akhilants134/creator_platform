@@ -13,7 +13,7 @@ const Dashboard = () => {
   const fetchPosts = async () => {
     try {
       setIsLoadingPosts(true);
-      const response = await api.get("/api/posts");
+      const response = await api.get("/posts");
       // Filter posts created by the current user
       const userPosts = response.data.data.filter(
         (post) => post.author._id === user._id || post.author === user._id,
@@ -38,7 +38,7 @@ const Dashboard = () => {
   const handleDeletePost = async (id) => {
     if (window.confirm("Are you sure you want to delete this post?")) {
       try {
-        await api.delete(`/api/posts/${id}`);
+        await api.delete(`/posts/${id}`);
         setPosts(posts.filter((post) => post._id !== id));
       } catch (error) {
         alert("Error deleting post");

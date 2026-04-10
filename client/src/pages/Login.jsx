@@ -27,7 +27,7 @@ const Login = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await api.post("/api/users/login", formData);
+      const response = await api.post("/users/login", formData);
       const data = response.data;
 
       login(data.user, data.token);

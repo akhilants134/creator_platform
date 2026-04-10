@@ -23,7 +23,7 @@ const ForgotPassword = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await api.post("/api/users/forgot-password", {
+      const response = await api.post("/users/forgot-password", {
         email: email.trim().toLowerCase(),
       });
 

@@ -80,6 +80,8 @@ app.get("/api/health", (req, res) => {
   res.json({ message: "BlogHub Server is healthy!" });
 });
 
+// Keep both auth and users prefixes for backward compatibility.
+app.use("/api/auth", userRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/posts", postRoutes(io));
 
