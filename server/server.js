@@ -1,46 +1,39 @@
-// server/server.js
-import express from "express";
 import dotenv from "dotenv";
-import cors from "cors";
 import jwt from "jsonwebtoken";
 import { createServer } from "http";
 import mongoose from "mongoose";
 import { Server } from "socket.io";
-import userRoutes from "./routes/userRoutes.js";
-import postRoutes from "./routes/postRoutes.js";
 import User from "./models/User.js";
+import { createApp } from "./app.js";
+import postRoutes from "./routes/postRoutes.js";
 
 dotenv.config();
 
-const app = express();
-const httpServer = createServer(app);
 const PORT = process.env.PORT || 5000;
-const io = new Server(httpServer, {
+const dbURI =
+  process.env.NODE_ENV === "test"
+    ? process.env.MONGO_URI_TEST || process.env.MONGO_URI
+    : process.env.MONGO_URI;
+
+if (!dbURI) {
+  console.error("ERROR: MONGO_URI is not defined in your .env file!");
+  process.exit(1);
+}
+
+mongoose
+  .connect(dbURI)
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => {
+    console.error("MongoDB connection error:", err.message);
+    process.exit(1);
+  });
+
+const io = new Server({
   cors: {
     origin: process.env.CLIENT_URL || "http://localhost:5173",
     credentials: true,
   },
 });
-
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
-    credentials: true,
-  }),
-);
-app.use(express.json());
-
-// Enhanced Connection Logic
-const dbURI = process.env.MONGO_URI;
-
-if (!dbURI) {
-  console.error("ERROR: MONGO_URI is not defined in your .env file!");
-} else {
-  mongoose
-    .connect(dbURI)
-    .then(() => console.log("Connected to MongoDB"))
-    .catch((err) => console.error("MongoDB connection error:", err.message));
-}
 
 io.use(async (socket, next) => {
   const token = socket.handshake.auth?.token;
@@ -72,18 +65,11 @@ io.on("connection", (socket) => {
     `✅ User connected: ${socket.id} | User: ${socket.data.user.email}`,
   );
 });
-app.get("/", (req, res) => {
-  res.send("Welcome to the Creator Platform API! 🚀");
-});
-
-app.get("/api/health", (req, res) => {
-  res.json({ message: "BlogHub Server is healthy!" });
-});
-
-// Keep both auth and users prefixes for backward compatibility.
-app.use("/api/auth", userRoutes);
-app.use("/api/users", userRoutes);
+const app = createApp();
 app.use("/api/posts", postRoutes(io));
+const httpServer = createServer(app);
+
+io.attach(httpServer);
 
 httpServer.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
