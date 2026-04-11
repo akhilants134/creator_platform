@@ -17,6 +17,11 @@ const hashResetToken = (token) => {
   return crypto.createHash("sha256").update(token).digest("hex");
 };
 
+const normalizeEmail = (email) =>
+  String(email ?? "")
+    .trim()
+    .toLowerCase();
+
 // @desc    Login user
 // @route   POST /api/users/login
 // @access  Public
@@ -31,7 +36,10 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email }).select("+password");
+    const normalizedEmail = normalizeEmail(email);
+    const user = await User.findOne({ email: normalizedEmail }).select(
+      "+password",
+    );
 
     if (!user) {
       return res.status(401).json({
@@ -76,6 +84,7 @@ export const loginUser = async (req, res) => {
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    const normalizedEmail = normalizeEmail(email);
 
     // 1. Validate all required fields are provided
     if (!name || !email || !password) {
@@ -87,7 +96,7 @@ export const registerUser = async (req, res) => {
     }
 
     // 2. Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email: normalizedEmail });
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -101,7 +110,7 @@ export const registerUser = async (req, res) => {
     // 4. Create new user with hashed password
     const user = await User.create({
       name,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
     });
 
@@ -204,7 +213,7 @@ export const updateUser = async (req, res) => {
 
     // Update fields if provided
     if (name) user.name = name;
-    if (email) user.email = email;
+    if (email) user.email = normalizeEmail(email);
 
     // Save updated user
     await user.save();

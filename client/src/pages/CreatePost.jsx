@@ -1,17 +1,17 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 const CreatePost = () => {
   const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    category: 'Other',
+    title: "",
+    content: "",
+    category: "Other",
   });
   const [image, setImage] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  
+  const [error, setError] = useState("");
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -25,28 +25,28 @@ const CreatePost = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setError("");
 
     const data = new FormData();
-    data.append('title', formData.title);
-    data.append('content', formData.content);
-    data.append('category', formData.category);
+    data.append("title", formData.title);
+    data.append("content", formData.content);
+    data.append("category", formData.category);
     if (image) {
-      data.append('image', image);
+      data.append("image", image);
     }
 
     try {
-      const response = await api.post('/api/posts', data, {
+      const response = await api.post("/posts", data, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
 
       if (response.data.success) {
-        navigate('/dashboard');
+        navigate("/dashboard");
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Error creating post');
+      setError(err.response?.data?.message || "Error creating post");
     } finally {
       setIsLoading(false);
     }
@@ -101,7 +101,7 @@ const CreatePost = () => {
               value={formData.content}
               onChange={handleChange}
               required
-              style={{ ...inputStyle, minHeight: '150px' }}
+              style={{ ...inputStyle, minHeight: "150px" }}
               placeholder="What's on your mind?"
             />
           </div>
@@ -110,7 +110,7 @@ const CreatePost = () => {
             disabled={isLoading}
             style={isLoading ? buttonDisabledStyle : buttonStyle}
           >
-            {isLoading ? 'Creating...' : 'Create Post'}
+            {isLoading ? "Creating..." : "Create Post"}
           </button>
         </form>
       </div>
@@ -118,15 +118,48 @@ const CreatePost = () => {
   );
 };
 
-const containerStyle = { padding: '2rem', display: 'flex', justifyContent: 'center' };
-const formCardStyle = { maxWidth: '600px', width: '100%', padding: '2rem', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' };
-const titleStyle = { marginBottom: '1.5rem', textAlign: 'center' };
-const formStyle = { display: 'flex', flexDirection: 'column', gap: '1rem' };
-const fieldStyle = { display: 'flex', flexDirection: 'column', gap: '0.5rem' };
-const labelStyle = { fontWeight: '600' };
-const inputStyle = { padding: '0.75rem', borderRadius: '4px', border: '1px solid #ddd' };
-const buttonStyle = { padding: '0.75rem', backgroundColor: '#007bff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' };
-const buttonDisabledStyle = { ...buttonStyle, backgroundColor: '#ccc', cursor: 'not-allowed' };
-const errorStyle = { padding: '0.75rem', backgroundColor: '#f8d7da', color: '#721c24', borderRadius: '4px', marginBottom: '1rem' };
+const containerStyle = {
+  padding: "2rem",
+  display: "flex",
+  justifyContent: "center",
+};
+const formCardStyle = {
+  maxWidth: "600px",
+  width: "100%",
+  padding: "2rem",
+  backgroundColor: "white",
+  borderRadius: "8px",
+  boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+};
+const titleStyle = { marginBottom: "1.5rem", textAlign: "center" };
+const formStyle = { display: "flex", flexDirection: "column", gap: "1rem" };
+const fieldStyle = { display: "flex", flexDirection: "column", gap: "0.5rem" };
+const labelStyle = { fontWeight: "600" };
+const inputStyle = {
+  padding: "0.75rem",
+  borderRadius: "4px",
+  border: "1px solid #ddd",
+};
+const buttonStyle = {
+  padding: "0.75rem",
+  backgroundColor: "#007bff",
+  color: "white",
+  border: "none",
+  borderRadius: "4px",
+  cursor: "pointer",
+  fontWeight: "bold",
+};
+const buttonDisabledStyle = {
+  ...buttonStyle,
+  backgroundColor: "#ccc",
+  cursor: "not-allowed",
+};
+const errorStyle = {
+  padding: "0.75rem",
+  backgroundColor: "#f8d7da",
+  color: "#721c24",
+  borderRadius: "4px",
+  marginBottom: "1rem",
+};
 
 export default CreatePost;

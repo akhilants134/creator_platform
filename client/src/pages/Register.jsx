@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 const Register = () => {
   // Form field states
@@ -102,45 +103,30 @@ const Register = () => {
       };
 
       // Send POST request to backend
-      const response = await fetch("/api/users/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(registrationData),
+      await api.post("/users/register", registrationData);
+
+      // Registration successful
+      setSuccessMessage(
+        "Account created successfully! Redirecting to login...",
+      );
+
+      // Clear form
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
       });
 
-      const isJsonResponse = (
-        response.headers.get("content-type") || ""
-      ).includes("application/json");
-      const data = isJsonResponse ? await response.json() : {};
-
-      if (response.ok) {
-        // Registration successful
-        setSuccessMessage(
-          "Account created successfully! Redirecting to login...",
-        );
-
-        // Clear form
-        setFormData({
-          name: "",
-          email: "",
-          password: "",
-          confirmPassword: "",
-        });
-
-        // Redirect to login page after 2 seconds
-        setTimeout(() => {
-          navigate("/login");
-        }, 2000);
-      } else {
-        // Registration failed - show error from backend
-        setApiError(data.message || "Registration failed. Please try again.");
-      }
-    } catch {
+      // Redirect to login page after 2 seconds
+      setTimeout(() => {
+        navigate("/login");
+      }, 2000);
+    } catch (error) {
       // Network or other error
       setApiError(
-        "Unable to connect to server. Please check your connection and try again.",
+        error.response?.data?.message ||
+          "Unable to connect to server. Please check your connection and try again.",
       );
     } finally {
       // Stop loading regardless of success/failure

@@ -17,7 +17,7 @@ const ResetPassword = () => {
   useEffect(() => {
     const verifyToken = async () => {
       try {
-        const response = await api.get(`/api/users/reset/${token}`);
+        const response = await api.get(`/users/reset/${token}`);
         setIsTokenValid(true);
         setEmail(response.data.email || "");
       } catch (requestError) {
@@ -51,7 +51,7 @@ const ResetPassword = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await api.post(`/api/users/reset/${token}`, {
+      const response = await api.post(`/users/reset/${token}`, {
         newPassword,
       });
 
