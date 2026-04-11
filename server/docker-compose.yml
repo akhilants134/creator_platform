@@ -1,0 +1,9 @@
+services:
+  server:
+    build: .
+    ports:
+      - "${SERVER_HOST_PORT:-5001}:5000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=development
