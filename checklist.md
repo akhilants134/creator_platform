@@ -19,7 +19,7 @@
 - [x] Redux DevTools disabled in production builds (N/A: Redux not used)
 - [x] Passwords hashed with bcrypt
 - [x] JWT tokens expire (JWT_EXPIRES_IN supported)
-- [ ] npm audit run and high/critical vulnerabilities addressed
+- [x] npm audit run and high/critical vulnerabilities addressed
 
 ## Build Steps
 
@@ -34,7 +34,7 @@
 
 ## Notes
 
-- Server runtime dependency audit still reports 2 high vulnerabilities (Cloudinary chain via cloudinary and multer-storage-cloudinary).
+- Server runtime dependency audit now reports 0 vulnerabilities after dependency updates.
 - Client runtime dependency audit was fixed and now reports 0 vulnerabilities.
 - If any secret was ever committed (for example in .env files), rotate immediately and scrub git history.
 - Production smoke test run on April 15, 2026 passed: frontend root and /dashboard returned 200 with HTML fallback, /api/health returned 200, and register/login flow succeeded (201/200) against production-built frontend + production-mode backend.
