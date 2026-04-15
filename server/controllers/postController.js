@@ -1,4 +1,5 @@
 import Post from "../models/Post.js";
+import { withErrorDetails } from "../utils/errorResponse.js";
 
 // @desc    Create a new post
 // @route   POST /api/posts
@@ -36,9 +37,13 @@ export const createPost = (io) => async (req, res) => {
     });
   } catch (error) {
     res.status(400).json({
-      success: false,
-      message: "Error creating post",
-      error: error.message,
+      ...withErrorDetails(
+        {
+          success: false,
+          message: "Error creating post",
+        },
+        error,
+      ),
     });
   }
 };
@@ -58,9 +63,13 @@ export const getPosts = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      success: false,
-      message: "Error fetching posts",
-      error: error.message,
+      ...withErrorDetails(
+        {
+          success: false,
+          message: "Error fetching posts",
+        },
+        error,
+      ),
     });
   }
 };
@@ -86,9 +95,13 @@ export const getPostById = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      success: false,
-      message: "Error fetching post",
-      error: error.message,
+      ...withErrorDetails(
+        {
+          success: false,
+          message: "Error fetching post",
+        },
+        error,
+      ),
     });
   }
 };
@@ -131,9 +144,13 @@ export const updatePost = async (req, res) => {
     });
   } catch (error) {
     res.status(400).json({
-      success: false,
-      message: "Error updating post",
-      error: error.message,
+      ...withErrorDetails(
+        {
+          success: false,
+          message: "Error updating post",
+        },
+        error,
+      ),
     });
   }
 };
@@ -167,9 +184,13 @@ export const deletePost = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      success: false,
-      message: "Error deleting post",
-      error: error.message,
+      ...withErrorDetails(
+        {
+          success: false,
+          message: "Error deleting post",
+        },
+        error,
+      ),
     });
   }
 };

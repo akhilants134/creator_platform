@@ -2,15 +2,15 @@ import User from "../models/User.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import logger from "../logger.js";
+import { withErrorDetails } from "../utils/errorResponse.js";
 
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000;
 
 const generateToken = (userId) => {
-  return jwt.sign(
-    { userId },
-    process.env.JWT_SECRET || "dev-secret-change-me",
-    { expiresIn: "7d" },
-  );
+  return jwt.sign({ userId }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+  });
 };
 
 const hashResetToken = (token) => {
@@ -71,9 +71,13 @@ export const loginUser = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      success: false,
-      message: "Server error during login",
-      error: error.message,
+      ...withErrorDetails(
+        {
+          success: false,
+          message: "Server error during login",
+        },
+        error,
+      ),
     });
   }
 };
@@ -124,11 +128,15 @@ export const registerUser = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    console.error("Registration error:", error);
+    logger.error("Registration error", { message: error.message });
     res.status(500).json({
-      success: false,
-      message: "Server error during registration",
-      error: error.message,
+      ...withErrorDetails(
+        {
+          success: false,
+          message: "Server error during registration",
+        },
+        error,
+      ),
     });
   }
 };
@@ -148,9 +156,13 @@ export const getAllUsers = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      success: false,
-      message: "Error fetching users",
-      error: error.message,
+      ...withErrorDetails(
+        {
+          success: false,
+          message: "Error fetching users",
+        },
+        error,
+      ),
     });
   }
 };
@@ -179,9 +191,13 @@ export const getUserById = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      success: false,
-      message: "Error fetching user",
-      error: error.message,
+      ...withErrorDetails(
+        {
+          success: false,
+          message: "Error fetching user",
+        },
+        error,
+      ),
     });
   }
 };
@@ -228,9 +244,13 @@ export const updateUser = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      success: false,
-      message: "Error updating user",
-      error: error.message,
+      ...withErrorDetails(
+        {
+          success: false,
+          message: "Error updating user",
+        },
+        error,
+      ),
     });
   }
 };
@@ -265,9 +285,13 @@ export const deleteUser = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({
-      success: false,
-      message: "Error deleting user",
-      error: error.message,
+      ...withErrorDetails(
+        {
+          success: false,
+          message: "Error deleting user",
+        },
+        error,
+      ),
     });
   }
 };
@@ -318,9 +342,13 @@ export const changePassword = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      success: false,
-      message: "Error changing password",
-      error: error.message,
+      ...withErrorDetails(
+        {
+          success: false,
+          message: "Error changing password",
+        },
+        error,
+      ),
     });
   }
 };
@@ -348,10 +376,10 @@ export const forgotPassword = async (req, res) => {
 
     const resetUrl = `${process.env.CLIENT_URL || "http://localhost:5173"}/reset-password/${resetToken}`;
 
-    console.log("\n=== PASSWORD RESET LINK ===");
-    console.log(`Email: ${user.email}`);
-    console.log(`Reset link: ${resetUrl}`);
-    console.log("===========================\n");
+    logger.info("Password reset link generated", {
+      email: user.email,
+      resetUrl,
+    });
 
     return res.status(200).json({
       success: true,
@@ -362,9 +390,13 @@ export const forgotPassword = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      success: false,
-      message: "Error requesting password reset",
-      error: error.message,
+      ...withErrorDetails(
+        {
+          success: false,
+          message: "Error requesting password reset",
+        },
+        error,
+      ),
     });
   }
 };
@@ -396,9 +428,13 @@ export const verifyResetToken = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      success: false,
-      message: "Error verifying reset token",
-      error: error.message,
+      ...withErrorDetails(
+        {
+          success: false,
+          message: "Error verifying reset token",
+        },
+        error,
+      ),
     });
   }
 };
@@ -437,9 +473,13 @@ export const resetPassword = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({
-      success: false,
-      message: "Error resetting password",
-      error: error.message,
+      ...withErrorDetails(
+        {
+          success: false,
+          message: "Error resetting password",
+        },
+        error,
+      ),
     });
   }
 };
