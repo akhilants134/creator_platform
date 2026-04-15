@@ -62,10 +62,8 @@ npm run client
 docker compose up --build
 ```
 
-By default, Docker maps:
-
 - API: `http://localhost:5001`
-- Frontend: `http://localhost:3000`
+- Frontend: `http://localhost:5173`
 
 This keeps `localhost:5000` available for local `npm run dev` in `server/`.
 
