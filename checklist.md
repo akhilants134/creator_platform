@@ -24,16 +24,18 @@
 ## Build Steps
 
 - [x] npm run build completes with no errors in client
-- [ ] Production build tested locally with serve/equivalent
-- [ ] All API calls verified against production build
-- [ ] SPA routing verified on page refresh in deployed/static setup
+- [x] Production build tested locally with serve/equivalent
+- [x] All API calls verified against production build
+- [x] SPA routing verified on page refresh in deployed/static setup
 - [x] Runtime dependencies are in dependencies
 - [x] devDependencies include nodemon, jest, eslint, and testing libraries
 - [x] node_modules is listed in .gitignore
-- [ ] End-to-end test of production build completed
+- [x] End-to-end test of production build completed
 
 ## Notes
 
 - Server runtime dependency audit still reports 2 high vulnerabilities (Cloudinary chain via cloudinary and multer-storage-cloudinary).
 - Client runtime dependency audit was fixed and now reports 0 vulnerabilities.
 - If any secret was ever committed (for example in .env files), rotate immediately and scrub git history.
+- Production smoke test run on April 15, 2026 passed: frontend root and /dashboard returned 200 with HTML fallback, /api/health returned 200, and register/login flow succeeded (201/200) against production-built frontend + production-mode backend.
+- No remote staging URL was configured in the repo, so smoke validation used local production-mode backend at http://localhost:5000.
