@@ -1,7 +1,7 @@
-import { v2 as cloudinary } from 'cloudinary';
-import { CloudinaryStorage } from 'multer-storage-cloudinary';
-import multer from 'multer';
-import dotenv from 'dotenv';
+import { v2 as cloudinary } from "cloudinary";
+import CloudinaryStorage from "multer-storage-cloudinary";
+import multer from "multer";
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -14,8 +14,8 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: 'blog-hub-posts',
-    allowed_formats: ['jpg', 'png', 'jpeg'],
+    folder: "blog-hub-posts",
+    allowed_formats: ["jpg", "png", "jpeg"],
   },
 });
 

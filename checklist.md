@@ -2,11 +2,12 @@
 
 ## Environment Variables
 
-- [ ] NODE_ENV=production set on hosting platform
-- [ ] MONGO_URI set to production database
-- [ ] JWT_SECRET set to a long, random value
-- [ ] CLOUDINARY keys configured in production
-- [ ] CLIENT_URL set to deployed frontend URL (no trailing slash)
+- [ ] NODE_ENV=production verified in hosting dashboard
+- [ ] MONGO_URI (production database) verified in hosting dashboard
+- [ ] JWT_SECRET (long random value) verified in hosting dashboard
+- [ ] CLOUDINARY_CLOUD_NAME / CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET verified in hosting dashboard
+- [ ] CLIENT_URL (deployed frontend URL, no trailing slash) verified in hosting dashboard
+- [ ] Deployed backend runtime validated with production env values (health + auth request)
 - [x] .env is in .gitignore
 - [x] .env.example committed to repository
 - [x] Verified no hardcoded secrets in tracked files and git history

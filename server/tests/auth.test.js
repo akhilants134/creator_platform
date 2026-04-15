@@ -1,10 +1,13 @@
 import dotenv from "dotenv";
+import { jest } from "@jest/globals";
 import mongoose from "mongoose";
 import request from "supertest";
 import app from "../app.js";
 import User from "../models/User.js";
 
 dotenv.config({ path: new URL("../.env", import.meta.url).pathname });
+
+jest.setTimeout(30000);
 
 describe("Auth Routes", () => {
   beforeAll(async () => {
