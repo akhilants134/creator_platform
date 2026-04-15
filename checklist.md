@@ -9,7 +9,7 @@
 - [ ] CLIENT_URL set to deployed frontend URL (no trailing slash)
 - [x] .env is in .gitignore
 - [x] .env.example committed to repository
-- [ ] Verified no hardcoded secrets in tracked files and git history
+- [x] Verified no hardcoded secrets in tracked files and git history
 
 ## Security
 
@@ -39,3 +39,4 @@
 - If any secret was ever committed (for example in .env files), rotate immediately and scrub git history.
 - Production smoke test run on April 15, 2026 passed: frontend root and /dashboard returned 200 with HTML fallback, /api/health returned 200, and register/login flow succeeded (201/200) against production-built frontend + production-mode backend.
 - No remote staging URL was configured in the repo, so smoke validation used local production-mode backend at http://localhost:5000.
+- Verified via git checks that only .env.example files are tracked in history; no real .env files were committed.
