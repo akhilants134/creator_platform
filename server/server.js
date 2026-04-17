@@ -15,11 +15,13 @@ const PORT = process.env.PORT || 5000;
 const dbURI =
   process.env.NODE_ENV === "test"
     ? process.env.MONGO_URI_TEST || process.env.MONGO_URI
-    : process.env.MONGO_URI;
+    : process.env.DATABASE_URL || process.env.MONGO_URI;
 const jwtSecret = process.env.JWT_SECRET;
 
 if (!dbURI) {
-  logger.error("MONGO_URI is not defined in environment variables");
+  logger.error(
+    "DATABASE_URL or MONGO_URI is not defined in environment variables",
+  );
   process.exit(1);
 }
 

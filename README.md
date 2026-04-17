@@ -25,6 +25,7 @@ Create a `.env` file in `server/` based on `.env.example` with values for:
 - `MONGO_ROOT_USERNAME`
 - `MONGO_ROOT_PASSWORD`
 - `MONGO_URI` for local server runs
+- `DATABASE_URL` for production deployments (e.g., Render)
 - `CLIENT_URL` if your frontend runs on a different origin
 
 At the repo root, you can also define Docker host ports in `.env`:
