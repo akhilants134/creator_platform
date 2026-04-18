@@ -4,8 +4,8 @@ export const getAllowedOrigins = () => {
   if (process.env.NODE_ENV !== "production") {
     return LOCAL_ORIGINS;
   }
-
-  return process.env.CLIENT_URL ? [process.env.CLIENT_URL] : [];
+  // Use FRONTEND_URL for production
+  return process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : [];
 };
 
 export const originValidator = (origin, callback) => {
