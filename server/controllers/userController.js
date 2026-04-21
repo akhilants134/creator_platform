@@ -70,6 +70,7 @@ export const loginUser = async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (error) {
+    console.error("Login error:", error); // Debugging line
     res.status(500).json({
       ...withErrorDetails(
         {
