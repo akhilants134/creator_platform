@@ -39,7 +39,8 @@ describe("Auth Routes", () => {
       password: "password123",
     });
 
-    expect(res.status).toBe(201);
+    // Intentionally break the test for CI failure scenario
+    expect(res.status).toBe(999); // Wrong status code
     expect(res.body).toHaveProperty("success", true);
     expect(res.body).toHaveProperty("data");
     expect(res.body.data).toHaveProperty("email", "testuser@example.com");
@@ -105,3 +106,4 @@ describe("Auth Routes", () => {
     expect(res.body).toHaveProperty("message");
   });
 });
+// PR demo comment
