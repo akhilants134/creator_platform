@@ -32,7 +32,7 @@ describe("Auth Routes", () => {
   });
 
   test("should register a new user successfully", async () => {
-    const res = await request(app).post("/api/auth/register").send({
+    const res = await request(app).post("/api/users/register").send({
       name: "Test User",
       email: "testuser@example.com",
       password: "password123",
@@ -45,13 +45,13 @@ describe("Auth Routes", () => {
   });
 
   test("should fail to register with an existing email", async () => {
-    await request(app).post("/api/auth/register").send({
+    await request(app).post("/api/users/register").send({
       name: "Existing User",
       email: "existing@example.com",
       password: "password123",
     });
 
-    const res = await request(app).post("/api/auth/register").send({
+    const res = await request(app).post("/api/users/register").send({
       name: "Another User",
       email: "existing@example.com",
       password: "differentpassword",
@@ -63,7 +63,7 @@ describe("Auth Routes", () => {
   });
 
   test("should fail to register with missing required fields", async () => {
-    const res = await request(app).post("/api/auth/register").send({
+    const res = await request(app).post("/api/users/register").send({
       name: "Incomplete User",
     });
 
@@ -72,13 +72,13 @@ describe("Auth Routes", () => {
   });
 
   test("should log in with correct credentials", async () => {
-    await request(app).post("/api/auth/register").send({
+    await request(app).post("/api/users/register").send({
       name: "Login Test User",
       email: "login@example.com",
       password: "password123",
     });
 
-    const res = await request(app).post("/api/auth/login").send({
+    const res = await request(app).post("/api/users/login").send({
       email: "login@example.com",
       password: "password123",
     });
@@ -95,7 +95,7 @@ describe("Auth Routes", () => {
       password: "correctpassword",
     });
 
-    const res = await request(app).post("/api/auth/login").send({
+    const res = await request(app).post("/api/users/login").send({
       email: "wrongpass@example.com",
       password: "wrongpassword",
     });
