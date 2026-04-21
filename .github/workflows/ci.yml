@@ -30,6 +30,7 @@ jobs:
           npm test
         env:
           MONGO_URI_TEST: ${{ secrets.MONGO_URI_TEST }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
       - name: Install client dependencies
         run: |
