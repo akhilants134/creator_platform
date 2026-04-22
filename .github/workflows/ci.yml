@@ -24,6 +24,15 @@ jobs:
           cd server
           npm ci
 
+      - name: Debug env vars (mask JWT_SECRET)
+        run: |
+          echo "MONGO_URI_TEST=$MONGO_URI_TEST"
+          echo "JWT_SECRET is set: [${{ secrets.JWT_SECRET != '' }}]"
+          env | grep -v JWT_SECRET
+        env:
+          MONGO_URI_TEST: ${{ secrets.MONGO_URI_TEST }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+
       - name: Run server tests
         run: |
           cd server
