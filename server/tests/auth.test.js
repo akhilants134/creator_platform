@@ -7,8 +7,14 @@ import request from "supertest";
 import app from "../app.js";
 import User from "../models/User.js";
 
-if (process.env.CI !== "true") {
-  dotenv.config({ path: new URL("../.env", import.meta.url).pathname });
+// Always load .env.test if present, fallback to .env
+import fs from "fs";
+const envTestPath = new URL("../.env.test", import.meta.url).pathname;
+const envPath = new URL("../.env", import.meta.url).pathname;
+if (fs.existsSync(envTestPath)) {
+  dotenv.config({ path: envTestPath });
+} else if (fs.existsSync(envPath)) {
+  dotenv.config({ path: envPath });
 }
 
 jest.setTimeout(30000);
