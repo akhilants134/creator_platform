@@ -53,7 +53,7 @@ const Dashboard = () => {
 
     try {
       console.log('Sending delete request to API for:', postId);
-      const response = await api.delete(`/api/posts/${postId}`);
+      const response = await api.delete(`/api/posts/${encodeURIComponent(postId)}`);
       console.log('Delete response:', response.data);
 
       if (response.data.success) {

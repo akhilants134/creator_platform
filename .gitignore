@@ -27,3 +27,6 @@ Thumbs.db
 *.log
 npm-debug.log*
 mern_project_submission.zip
+middleware-practice/
+server/.env.docker
+server/.npm_cache/
