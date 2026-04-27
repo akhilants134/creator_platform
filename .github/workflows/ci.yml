@@ -10,6 +10,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -25,6 +31,8 @@ jobs:
           npm ci
 
       - name: Run server tests
+        env:
+          MONGO_URI_TEST: mongodb://localhost:27017/creator_platform_test
         run: |
           cd server
           npm test
