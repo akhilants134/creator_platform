@@ -33,6 +33,7 @@ jobs:
       - name: Run server tests
         env:
           MONGO_URI_TEST: mongodb://localhost:27017/creator_platform_test
+          JWT_SECRET: testsecret
         run: |
           cd server
           npm test
