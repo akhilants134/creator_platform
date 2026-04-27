@@ -1,3 +1,4 @@
+// Trigger CI: test comment for new repo
 // Trigger CI: test comment
 import dotenv from "dotenv";
 import { jest } from "@jest/globals";
@@ -6,7 +7,15 @@ import request from "supertest";
 import app from "../app.js";
 import User from "../models/User.js";
 
-dotenv.config({ path: new URL("../.env", import.meta.url).pathname });
+// Always load .env.test if present, fallback to .env
+import fs from "fs";
+const envTestPath = new URL("../.env.test", import.meta.url).pathname;
+const envPath = new URL("../.env", import.meta.url).pathname;
+if (fs.existsSync(envTestPath)) {
+  dotenv.config({ path: envTestPath });
+} else if (fs.existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+}
 
 jest.setTimeout(30000);
 
@@ -39,7 +48,8 @@ describe("Auth Routes", () => {
       password: "password123",
     });
 
-    expect(res.status).toBe(201);
+    // Intentionally break the test for CI failure scenario
+    expect(res.status).toBe(201); // Restored correct status for CI pass
     expect(res.body).toHaveProperty("success", true);
     expect(res.body).toHaveProperty("data");
     expect(res.body.data).toHaveProperty("email", "testuser@example.com");
@@ -105,3 +115,5 @@ describe("Auth Routes", () => {
     expect(res.body).toHaveProperty("message");
   });
 });
+// PR demo comment
+// PR demo: test comment

@@ -10,6 +10,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -17,7 +23,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Install server dependencies
         run: |
@@ -25,12 +31,12 @@ jobs:
           npm ci
 
       - name: Run server tests
+        env:
+          MONGO_URI_TEST: mongodb://localhost:27017/creator_platform_test
+          JWT_SECRET: testsecret
         run: |
           cd server
           npm test
-        env:
-          MONGO_URI_TEST: ${{ secrets.MONGO_URI_TEST }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
       - name: Install client dependencies
         run: |
