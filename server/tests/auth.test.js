@@ -43,8 +43,7 @@ describe("Auth Routes", () => {
     });
 
     // Intentionally break the test for CI failure scenario
-    // Fixed: expect correct status code
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(999); // Wrong status to trigger CI failure
     expect(res.body).toHaveProperty("success", true);
     expect(res.body).toHaveProperty("data");
     expect(res.body.data).toHaveProperty("email", "testuser@example.com");
