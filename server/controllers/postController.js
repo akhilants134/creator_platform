@@ -7,23 +7,22 @@ import { withErrorDetails } from "../utils/errorResponse.js";
 export const createPost = (io) => async (req, res) => {
   try {
     const { title, content, category } = req.body;
-    const author = req.user._id;
+    const author = req.user?.id || req.user?._id;
 
-    const post = new Post({
+    const createdPost = await Post.create({
       title,
       content,
       category,
       author,
-      image: req.file ? req.file.path : undefined, // Cloudinary provides the path (URL)
+      image: req.file ? req.file.path : undefined,
     });
-
-    const createdPost = await post.save();
 
     if (io) {
       io.emit("newPost", {
         message: `New post created by ${req.user.name}`,
         post: {
           _id: createdPost._id,
+          id: createdPost.id,
           title: createdPost.title,
           createdBy: req.user.name,
         },
@@ -42,7 +41,7 @@ export const createPost = (io) => async (req, res) => {
           success: false,
           message: "Error creating post",
         },
-        error,
+        error
       ),
     });
   }
@@ -53,9 +52,7 @@ export const createPost = (io) => async (req, res) => {
 // @access  Public
 export const getPosts = async (req, res) => {
   try {
-    const posts = await Post.find()
-      .populate("author", "name email")
-      .sort({ createdAt: -1 });
+    const posts = await Post.findAll();
     res.status(200).json({
       success: true,
       count: posts.length,
@@ -68,7 +65,7 @@ export const getPosts = async (req, res) => {
           success: false,
           message: "Error fetching posts",
         },
-        error,
+        error
       ),
     });
   }
@@ -79,10 +76,7 @@ export const getPosts = async (req, res) => {
 // @access  Public
 export const getPostById = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id).populate(
-      "author",
-      "name email",
-    );
+    const post = await Post.findById(req.params.id);
     if (!post) {
       return res.status(404).json({
         success: false,
@@ -100,7 +94,7 @@ export const getPostById = async (req, res) => {
           success: false,
           message: "Error fetching post",
         },
-        error,
+        error
       ),
     });
   }
@@ -120,8 +114,11 @@ export const updatePost = async (req, res) => {
       });
     }
 
+    const currentUserId = req.user?.id || req.user?._id;
+    const authorId = post.author?.id || post.author?._id || post.authorId || post.author;
+
     // Check if the user is the author
-    if (post.author.toString() !== req.user._id.toString()) {
+    if (authorId?.toString() !== currentUserId?.toString()) {
       return res.status(403).json({
         success: false,
         message: "You can only edit your own posts",
@@ -129,14 +126,13 @@ export const updatePost = async (req, res) => {
     }
 
     const { title, content, category } = req.body;
-    post.title = title || post.title;
-    post.content = content || post.content;
-    post.category = category || post.category;
-    if (req.file) {
-      post.image = req.file.path;
-    }
+    const updates = {};
+    if (title) updates.title = title;
+    if (content) updates.content = content;
+    if (category) updates.category = category;
+    if (req.file) updates.image = req.file.path;
 
-    const updatedPost = await post.save();
+    const updatedPost = await Post.update(req.params.id, updates);
     res.status(200).json({
       success: true,
       message: "Post updated successfully",
@@ -149,7 +145,7 @@ export const updatePost = async (req, res) => {
           success: false,
           message: "Error updating post",
         },
-        error,
+        error
       ),
     });
   }
@@ -169,15 +165,18 @@ export const deletePost = async (req, res) => {
       });
     }
 
+    const currentUserId = req.user?.id || req.user?._id;
+    const authorId = post.author?.id || post.author?._id || post.authorId || post.author;
+
     // Check if the user is the author
-    if (post.author.toString() !== req.user._id.toString()) {
+    if (authorId?.toString() !== currentUserId?.toString()) {
       return res.status(403).json({
         success: false,
         message: "You can only delete your own posts",
       });
     }
 
-    await Post.findByIdAndDelete(req.params.id);
+    await Post.deleteById(req.params.id);
     res.status(200).json({
       success: true,
       message: "Post deleted successfully",
@@ -189,7 +188,7 @@ export const deletePost = async (req, res) => {
           success: false,
           message: "Error deleting post",
         },
-        error,
+        error
       ),
     });
   }

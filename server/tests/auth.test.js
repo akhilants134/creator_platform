@@ -2,10 +2,10 @@
 // Trigger CI: test comment
 import dotenv from "dotenv";
 import { jest } from "@jest/globals";
-import mongoose from "mongoose";
 import request from "supertest";
 import app from "../app.js";
 import User from "../models/User.js";
+import { initDb, pool } from "../config/db.js";
 
 // Always load .env.test if present, fallback to .env
 import fs from "fs";
@@ -21,24 +21,16 @@ jest.setTimeout(30000);
 
 describe("Auth Routes", () => {
   beforeAll(async () => {
-    const testDbUri = process.env.MONGO_URI_TEST || process.env.MONGO_URI;
-
-    if (!testDbUri) {
-      throw new Error(
-        "MONGO_URI_TEST (or fallback MONGO_URI) must be defined for tests.",
-      );
-    }
-
-    await mongoose.connect(testDbUri);
-    await User.deleteMany({});
+    await initDb();
+    await pool.query("DELETE FROM posts; DELETE FROM users;");
   });
 
   afterEach(async () => {
-    await User.deleteMany({});
+    await pool.query("DELETE FROM posts; DELETE FROM users;");
   });
 
   afterAll(async () => {
-    await mongoose.connection.close();
+    await pool.end();
   });
 
   test("should register a new user successfully", async () => {
