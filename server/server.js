@@ -1,8 +1,3 @@
-// server/server.js
-import express from "express";
-import dotenv from "dotenv";
-import cors from "cors";
-import mongoose from "mongoose";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import { createServer } from "http";
@@ -13,65 +8,16 @@ import { createApp } from "./app.js";
 import { originValidator } from "./config/cors.js";
 import logger from "./logger.js";
 
-// Connect to database
-connectDB();
+dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 const dbURI =
   process.env.DATABASE_URL ||
   process.env.POSTGRES_URL ||
+  process.env.DATABASE_URL_TEST ||
   process.env.MONGO_URI;
 const jwtSecret = process.env.JWT_SECRET;
 
-// Middleware
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL,
-  }),
-);
-app.use(express.json());
-
-// Enhanced Connection Logic
-const dbURI = process.env.MONGODB_URI;
-
-if (!dbURI) {
-  console.error("ERROR: MONGO_URI is not defined in your .env file!");
-} else {
-  mongoose
-    .connect(dbURI)
-    .then(() => console.log("Connected to MongoDB"))
-    .catch((err) => console.error("MongoDB connection error:", err.message));
-}
-
-// This tells the server how to respond to the "/" path
-app.get("/", (req, res) => {
-  res.json({
-    message: "Welcome to the Creators Platform API!",
-    status: "Online",
-  });
-});
-
-app.use('/api/users', userRoutes);
-app.use('/api/auth', authRoutes);
-app.use('/api/posts', postRoutes);
-app.use('/api/debug', debugRoutes);
-app.use('/api/analytics', analyticsRoutes);
-app.use('/api/upload', uploadRoutes);
-
-// Health check endpoint (keep this for testing)
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    message: 'Server is running!',
-    timestamp: new Date(),
-  });
-});
-
-// Error handling middleware (must be after all routes)
-app.use(errorHandler);
-
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
 if (!dbURI) {
   logger.error(
     "DATABASE_URL or POSTGRES_URL is not defined in environment variables"
@@ -84,7 +30,7 @@ if (!jwtSecret) {
   process.exit(1);
 }
 
-// Initialize Neon PostgreSQL database
+// Initialize PostgreSQL database
 try {
   await initDb();
 } catch (err) {
