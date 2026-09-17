@@ -6,11 +6,18 @@ dotenv.config();
 
 const { Pool } = pg;
 
-const connectionString =
+const rawConnectionString =
   process.env.DATABASE_URL ||
   process.env.POSTGRES_URL ||
-  process.env.DATABASE_URL_TEST ||
-  process.env.MONGO_URI;
+  process.env.DATABASE_URL_TEST;
+
+if (!rawConnectionString || rawConnectionString.startsWith("mongodb")) {
+  logger.error(
+    "Missing or invalid PostgreSQL connection string! Ensure DATABASE_URL is set to your Neon PostgreSQL URL (postgresql://...)."
+  );
+}
+
+const connectionString = rawConnectionString;
 
 const isLocalhost =
   connectionString?.includes("localhost") ||

@@ -14,13 +14,12 @@ const PORT = process.env.PORT || 5000;
 const dbURI =
   process.env.DATABASE_URL ||
   process.env.POSTGRES_URL ||
-  process.env.DATABASE_URL_TEST ||
-  process.env.MONGO_URI;
+  process.env.DATABASE_URL_TEST;
 const jwtSecret = process.env.JWT_SECRET;
 
-if (!dbURI) {
+if (!dbURI || dbURI.startsWith("mongodb")) {
   logger.error(
-    "DATABASE_URL or POSTGRES_URL is not defined in environment variables"
+    "DATABASE_URL is missing or invalid in environment variables! Please provide a PostgreSQL connection string (postgresql://...)."
   );
   process.exit(1);
 }
