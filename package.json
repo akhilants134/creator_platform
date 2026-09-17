@@ -4,7 +4,12 @@
   "scripts": {
     "client": "npm run dev --prefix client",
     "server": "npm run dev --prefix server",
+    "client:local": "npm run dev --prefix client -- --port 5174",
+    "server:local": "npm run dev --prefix server",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "mode:local": "docker compose stop server client >/dev/null 2>&1 || true && concurrently \"npm run server:local\" \"npm run client:local\"",
+    "mode:docker": "docker compose up --build",
+    "mode:docker:down": "docker compose down",
     "install-all": "npm install && npm install --prefix client && npm install --prefix server"
   },
   "devDependencies": {

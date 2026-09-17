@@ -1,0 +1,63 @@
+# Production Readiness Checklist
+
+## Environment Variables
+
+- [ ] NODE_ENV=production verified in hosting dashboard
+- [ ] MONGO_URI (production database) verified in hosting dashboard
+- [ ] JWT_SECRET (long random value) verified in hosting dashboard
+- [ ] CLOUDINARY_CLOUD_NAME / CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET verified in hosting dashboard
+- [ ] CLIENT_URL (deployed frontend URL, no trailing slash) verified in hosting dashboard
+- [x] Deployed backend runtime validated with production env values (health + auth request)
+- [x] .env is in .gitignore
+- [x] .env.example committed to repository
+- [x] Verified no hardcoded secrets in tracked files and git history
+
+Note: the unchecked environment items above require hosting dashboard access and cannot be verified locally from this workspace.
+
+## Production Values
+
+- NODE_ENV: `production`
+- MONGO_URI: production MongoDB connection string from your host or Atlas
+- JWT_SECRET: long random secret, unique per environment
+- CLOUDINARY_CLOUD_NAME: production Cloudinary cloud name
+- CLOUDINARY_API_KEY: production Cloudinary API key
+- CLOUDINARY_API_SECRET: production Cloudinary API secret
+- CLIENT_URL: deployed frontend URL without a trailing slash
+
+## Verification
+
+- Confirm the host environment variables match the production values above.
+- Confirm the frontend URL is the deployed URL, not a local development URL.
+- Confirm `GET /api/health` returns 200 in production.
+- Confirm an auth request succeeds against the production backend.
+
+## Security
+
+- [x] CORS restricted by environment with strict origin allowlist in production
+- [x] Production error responses hide detailed error messages
+- [x] Application console.log usage replaced with structured logging
+- [x] Redux DevTools disabled in production builds (N/A: Redux not used)
+- [x] Passwords hashed with bcrypt
+- [x] JWT tokens expire (JWT_EXPIRES_IN supported)
+- [x] npm audit run and high/critical vulnerabilities addressed
+
+## Build Steps
+
+- [x] npm run build completes with no errors in client
+- [x] Production build tested locally with serve/equivalent
+- [x] All API calls verified against production build
+- [x] SPA routing verified on page refresh in deployed/static setup
+- [x] Runtime dependencies are in dependencies
+- [x] devDependencies include nodemon, jest, eslint, and testing libraries
+- [x] node_modules is listed in .gitignore
+- [x] End-to-end test of production build completed
+
+## Notes
+
+- Server runtime dependency audit now reports 0 vulnerabilities after dependency updates.
+- Client runtime dependency audit was fixed and now reports 0 vulnerabilities.
+- If any secret was ever committed (for example in .env files), rotate immediately and scrub git history.
+- Production smoke test run on April 15, 2026 passed: frontend root and /dashboard returned 200 with HTML fallback, /api/health returned 200, and register/login flow succeeded (201/200) against production-built frontend + production-mode backend.
+- No remote staging URL was configured in the repo, so smoke validation used local production-mode backend at http://localhost:5000.
+- Verified via git checks that only .env.example files are tracked in history; no real .env files were committed.
+- Runtime validation rerun on April 15, 2026 at http://localhost:5000: GET /api/health returned 200 with healthy JSON, and POST /api/auth/register returned 201 with a unique test user.
