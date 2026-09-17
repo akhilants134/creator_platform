@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Navigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
@@ -10,13 +10,19 @@ const Dashboard = () => {
   const [isLoadingPosts, setIsLoadingPosts] = useState(true);
   const [requestError, setRequestError] = useState("");
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
+    if (!user) return;
     try {
       setIsLoadingPosts(true);
       const response = await api.get("/posts");
       // Filter posts created by the current user
-      const userPosts = response.data.data.filter(
-        (post) => post.author._id === user._id || post.author === user._id,
+      const currentUserId = user._id || user.id;
+      const userPosts = (response.data.data || []).filter(
+        (post) =>
+          post.author?._id === currentUserId ||
+          post.author?.id === currentUserId ||
+          post.author === currentUserId ||
+          post.authorId === currentUserId,
       );
       setPosts(userPosts);
     } catch (error) {
@@ -27,20 +33,20 @@ const Dashboard = () => {
     } finally {
       setIsLoadingPosts(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (user) {
       fetchPosts();
     }
-  }, [user]);
+  }, [user, fetchPosts]);
 
   const handleDeletePost = async (id) => {
     if (window.confirm("Are you sure you want to delete this post?")) {
       try {
         await api.delete(`/posts/${id}`);
-        setPosts(posts.filter((post) => post._id !== id));
-      } catch (error) {
+        setPosts((prev) => prev.filter((post) => (post._id || post.id) !== id));
+      } catch {
         alert("Error deleting post");
       }
     }
@@ -59,7 +65,9 @@ const Dashboard = () => {
       <div style={headerSectionStyle}>
         <div>
           <h1>Dashboard</h1>
-          <p>Welcome back, {user.name || user.email}!</p>
+          <p style={{ marginTop: "0.5rem", color: "#5a5a5a" }}>
+            Welcome back, {user.name || user.email}!
+          </p>
         </div>
         <Link to="/create-post" style={createBtnStyle}>
           + Create New Post
@@ -89,7 +97,7 @@ const Dashboard = () => {
         <div style={postsGridStyle}>
           {posts.map((post) => (
             <PostCard
-              key={post._id}
+              key={post._id || post.id}
               post={post}
               onDelete={handleDeletePost}
               isOwner={true}
@@ -171,7 +179,6 @@ const emptyStateStyle = {
   backgroundColor: "#f9f9f9",
   borderRadius: "8px",
 };
-const subtitleStyle = { marginTop: "0.5rem", color: "#5a5a5a" };
 const errorStyle = { marginTop: "1rem", color: "#dc3545" };
 const logoutBtnStyle = {
   padding: "0.75rem 1.5rem",

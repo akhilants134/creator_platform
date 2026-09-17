@@ -22,36 +22,6 @@ const CreatePost = () => {
     setImage(e.target.files[0]);
   };
 
-  const handleUpload = async (imageFormData) => {
-    setUploading(true);
-    setUploadError('');
-
-    try {
-      const response = await api.post('/api/upload', imageFormData);
-      // response.data should be: { success: true, url: "...", publicId: "..." }
-
-      if (response.data.success) {
-        setCoverImageUrl(response.data.url);
-        toast.success('Image uploaded successfully!');
-      }
-    } catch (error) {
-      const message = error.response?.data?.message || 'Image upload failed';
-      setUploadError(message);
-      toast.error(message);
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  /**
-   * TODO: Handle the orphaned upload problem.
-   * Currently, if a user uploads an image but then changes it or cancels the post,
-   * the old image remains on Cloudinary. Future improvement: delete the old image
-   * using its public_id before setting a new coverImageUrl or on component unmount
-   * if the post wasn't created.
-   */
-
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
