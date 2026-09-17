@@ -21,7 +21,7 @@ export const protect = async (req, res, next) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = await User.findById(decoded.userId).select("-password");
+    req.user = await User.findById(decoded.userId);
 
     if (!req.user) {
       return res.status(401).json({
@@ -49,3 +49,5 @@ export const protect = async (req, res, next) => {
     });
   }
 };
+
+export default protect;

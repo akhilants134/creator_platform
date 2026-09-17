@@ -1,3 +1,5 @@
+[![CI](https://github.com/yourusername/creator-platform/workflows/CI/badge.svg)](https://github.com/yourusername/creator-platform/actions)
+
 # Creator Platform
 
 A full-stack creator platform with a React frontend, an Express/MongoDB backend, and Docker support for local development.
