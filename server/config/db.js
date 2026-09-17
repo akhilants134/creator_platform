@@ -9,13 +9,22 @@ const { Pool } = pg;
 const connectionString =
   process.env.DATABASE_URL ||
   process.env.POSTGRES_URL ||
+  process.env.DATABASE_URL_TEST ||
   process.env.MONGO_URI;
+
+const isLocalhost =
+  connectionString?.includes("localhost") ||
+  connectionString?.includes("127.0.0.1");
 
 export const pool = new Pool({
   connectionString,
-  ssl: {
-    rejectUnauthorized: false,
-  },
+  ...(isLocalhost
+    ? {}
+    : {
+        ssl: {
+          rejectUnauthorized: false,
+        },
+      }),
 });
 
 export const query = async (text, params) => {
@@ -62,7 +71,7 @@ export const initDb = async () => {
       );
     `);
 
-    logger.info("Connected to Neon PostgreSQL and initialized database tables.");
+    logger.info("Connected to PostgreSQL and initialized database tables.");
   } catch (error) {
     logger.error("Failed to initialize PostgreSQL database:", {
       message: error.message,

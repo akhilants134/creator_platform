@@ -2,20 +2,35 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "feature/**", "feat/**"]
   pull_request:
-    branches: [main]
+    branches: [main, "feature/**", "feat/**"]
 
 jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgrespassword
+          POSTGRES_DB: creator_platform_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "20"
 
@@ -29,8 +44,8 @@ jobs:
           cd server
           npm test
         env:
-          MONGO_URI_TEST: ${{ secrets.MONGO_URI_TEST }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          DATABASE_URL: postgresql://postgres:postgrespassword@localhost:5432/creator_platform_test
+          JWT_SECRET: test-jwt-secret-key-12345
 
       - name: Install client dependencies
         run: |
