@@ -2,10 +2,11 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import userRoutes from "./routes/userRoutes.js";
+import postRoutes from "./routes/postRoutes.js";
 import { originValidator } from "./config/cors.js";
 import logger, { morganStream } from "./logger.js";
 
-export const createApp = () => {
+export const createApp = (io = null) => {
   const app = express();
 
   app.use(
@@ -34,6 +35,7 @@ export const createApp = () => {
   // Keep both auth and users prefixes for backward compatibility.
   app.use("/api/auth", userRoutes);
   app.use("/api/users", userRoutes);
+  app.use("/api/posts", postRoutes(io));
 
   app.use((error, req, res, next) => {
     if (error.message === "CORS origin not allowed") {

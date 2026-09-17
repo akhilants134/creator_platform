@@ -37,9 +37,7 @@ export const loginUser = async (req, res) => {
     }
 
     const normalizedEmail = normalizeEmail(email);
-    const user = await User.findOne({ email: normalizedEmail }).select(
-      "+password",
-    );
+    const user = await User.findByEmail(normalizedEmail, true);
 
     if (!user) {
       return res.status(401).json({
@@ -59,6 +57,7 @@ export const loginUser = async (req, res) => {
 
     const safeUser = {
       _id: user._id,
+      id: user.id,
       name: user.name,
       email: user.email,
     };
@@ -70,14 +69,14 @@ export const loginUser = async (req, res) => {
       token: generateToken(user._id),
     });
   } catch (error) {
-    console.error("Login error:", error); // Debugging line
+    logger.error("Login error", { message: error.message });
     res.status(500).json({
       ...withErrorDetails(
         {
           success: false,
           message: "Server error during login",
         },
-        error,
+        error
       ),
     });
   }
@@ -91,7 +90,6 @@ export const registerUser = async (req, res) => {
     const { name, email, password } = req.body;
     const normalizedEmail = normalizeEmail(email);
 
-    // 1. Validate all required fields are provided
     if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
@@ -100,8 +98,7 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    // 2. Check if user already exists
-    const existingUser = await User.findOne({ email: normalizedEmail });
+    const existingUser = await User.findByEmail(normalizedEmail);
     if (existingUser) {
       return res.status(400).json({
         success: false,
@@ -109,20 +106,14 @@ export const registerUser = async (req, res) => {
       });
     }
 
-    // 3. Hash the password for security
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // 4. Create new user with hashed password
     const user = await User.create({
       name,
       email: normalizedEmail,
       password: hashedPassword,
     });
 
-    // 5. Remove password from response
-    user.password = undefined;
-
-    // 6. Send success response
     res.status(201).json({
       success: true,
       message: "User registered successfully",
@@ -136,7 +127,7 @@ export const registerUser = async (req, res) => {
           success: false,
           message: "Server error during registration",
         },
-        error,
+        error
       ),
     });
   }
@@ -147,8 +138,7 @@ export const registerUser = async (req, res) => {
 // @access  Public (will be protected later with auth)
 export const getAllUsers = async (req, res) => {
   try {
-    // Fetch all users, excluding password field
-    const users = await User.find().select("-password");
+    const users = await User.findAll();
 
     res.status(200).json({
       success: true,
@@ -162,7 +152,7 @@ export const getAllUsers = async (req, res) => {
           success: false,
           message: "Error fetching users",
         },
-        error,
+        error
       ),
     });
   }
@@ -174,11 +164,8 @@ export const getAllUsers = async (req, res) => {
 export const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
+    const user = await User.findById(id);
 
-    // Find user by ID, excluding password
-    const user = await User.findById(id).select("-password");
-
-    // Check if user exists
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -197,7 +184,7 @@ export const getUserById = async (req, res) => {
           success: false,
           message: "Error fetching user",
         },
-        error,
+        error
       ),
     });
   }
@@ -205,22 +192,21 @@ export const getUserById = async (req, res) => {
 
 // @desc    Update user
 // @route   PUT /api/users/:id
-// @access  Private (will add auth later)
+// @access  Private
 export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, email } = req.body;
 
-    if (req.user.id !== id) {
+    const currentUserId = req.user?.id || req.user?._id;
+    if (currentUserId !== id) {
       return res.status(403).json({
         success: false,
         message: "You can only update your own profile",
       });
     }
 
-    // Find user
     const user = await User.findById(id);
-
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -228,20 +214,15 @@ export const updateUser = async (req, res) => {
       });
     }
 
-    // Update fields if provided
-    if (name) user.name = name;
-    if (email) user.email = normalizeEmail(email);
-
-    // Save updated user
-    await user.save();
-
-    // Remove password from response
-    user.password = undefined;
+    const updatedUser = await User.update(id, {
+      ...(name && { name }),
+      ...(email && { email }),
+    });
 
     res.status(200).json({
       success: true,
       message: "User updated successfully",
-      data: user,
+      data: updatedUser,
     });
   } catch (error) {
     res.status(500).json({
@@ -250,7 +231,7 @@ export const updateUser = async (req, res) => {
           success: false,
           message: "Error updating user",
         },
-        error,
+        error
       ),
     });
   }
@@ -258,27 +239,28 @@ export const updateUser = async (req, res) => {
 
 // @desc    Delete user
 // @route   DELETE /api/users/:id
-// @access  Private (will add auth later)
+// @access  Private
 export const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
+    const currentUserId = req.user?.id || req.user?._id;
 
-    if (req.user.id !== id) {
+    if (currentUserId !== id) {
       return res.status(403).json({
         success: false,
         message: "You can only delete your own profile",
       });
     }
 
-    // Find and delete user
-    const user = await User.findByIdAndDelete(id);
-
+    const user = await User.findById(id);
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found",
       });
     }
+
+    await User.deleteById(id);
 
     res.status(200).json({
       success: true,
@@ -291,7 +273,7 @@ export const deleteUser = async (req, res) => {
           success: false,
           message: "Error deleting user",
         },
-        error,
+        error
       ),
     });
   }
@@ -303,8 +285,9 @@ export const deleteUser = async (req, res) => {
 export const changePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
+    const currentUserId = req.user?.id || req.user?._id;
 
-    const user = await User.findById(req.user._id).select("+password");
+    const user = await User.findById(currentUserId, true);
 
     if (!user) {
       return res.status(404).json({
@@ -315,7 +298,7 @@ export const changePassword = async (req, res) => {
 
     const isOldPasswordCorrect = await bcrypt.compare(
       oldPassword,
-      user.password,
+      user.password
     );
 
     if (!isOldPasswordCorrect) {
@@ -333,9 +316,11 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    user.password = await bcrypt.hash(newPassword, 10);
-    user.passwordChangedAt = new Date();
-    await user.save();
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await User.update(user.id, {
+      password: hashedPassword,
+      passwordChangedAt: new Date(),
+    });
 
     return res.status(200).json({
       success: true,
@@ -348,7 +333,7 @@ export const changePassword = async (req, res) => {
           success: false,
           message: "Error changing password",
         },
-        error,
+        error
       ),
     });
   }
@@ -360,8 +345,8 @@ export const changePassword = async (req, res) => {
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    const normalizedEmail = email.trim().toLowerCase();
-    const user = await User.findOne({ email: normalizedEmail });
+    const normalizedEmail = normalizeEmail(email);
+    const user = await User.findByEmail(normalizedEmail);
 
     if (!user) {
       return res.status(200).json({
@@ -371,9 +356,10 @@ export const forgotPassword = async (req, res) => {
     }
 
     const resetToken = crypto.randomBytes(32).toString("hex");
-    user.resetPasswordToken = hashResetToken(resetToken);
-    user.resetPasswordExpires = new Date(Date.now() + RESET_TOKEN_TTL_MS);
-    await user.save();
+    await User.update(user.id, {
+      resetPasswordToken: hashResetToken(resetToken),
+      resetPasswordExpires: new Date(Date.now() + RESET_TOKEN_TTL_MS),
+    });
 
     const resetUrl = `${process.env.CLIENT_URL || "http://localhost:5173"}/reset-password/${resetToken}`;
 
@@ -396,7 +382,7 @@ export const forgotPassword = async (req, res) => {
           success: false,
           message: "Error requesting password reset",
         },
-        error,
+        error
       ),
     });
   }
@@ -410,10 +396,7 @@ export const verifyResetToken = async (req, res) => {
     const { token } = req.params;
     const hashedToken = hashResetToken(token);
 
-    const user = await User.findOne({
-      resetPasswordToken: hashedToken,
-      resetPasswordExpires: { $gt: new Date() },
-    });
+    const user = await User.findByResetToken(hashedToken);
 
     if (!user) {
       return res.status(400).json({
@@ -434,7 +417,7 @@ export const verifyResetToken = async (req, res) => {
           success: false,
           message: "Error verifying reset token",
         },
-        error,
+        error
       ),
     });
   }
@@ -449,10 +432,7 @@ export const resetPassword = async (req, res) => {
     const { newPassword } = req.body;
     const hashedToken = hashResetToken(token);
 
-    const user = await User.findOne({
-      resetPasswordToken: hashedToken,
-      resetPasswordExpires: { $gt: new Date() },
-    });
+    const user = await User.findByResetToken(hashedToken);
 
     if (!user) {
       return res.status(400).json({
@@ -462,11 +442,12 @@ export const resetPassword = async (req, res) => {
     }
 
     const passwordHash = await bcrypt.hash(newPassword, 10);
-    user.password = passwordHash;
-    user.passwordChangedAt = new Date();
-    user.resetPasswordToken = null;
-    user.resetPasswordExpires = null;
-    await user.save();
+    await User.update(user.id, {
+      password: passwordHash,
+      passwordChangedAt: new Date(),
+      resetPasswordToken: null,
+      resetPasswordExpires: null,
+    });
 
     return res.status(200).json({
       success: true,
@@ -479,7 +460,7 @@ export const resetPassword = async (req, res) => {
           success: false,
           message: "Error resetting password",
         },
-        error,
+        error
       ),
     });
   }
