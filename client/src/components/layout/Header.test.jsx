@@ -1,11 +1,12 @@
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import Header from "./Header";
 import { useAuth } from "../../context/AuthContext";
 
-jest.mock("../../context/AuthContext", () => ({
-  useAuth: jest.fn(),
+vi.mock("../../context/AuthContext", () => ({
+  useAuth: vi.fn(),
 }));
 
 const renderHeader = () =>
@@ -19,7 +20,7 @@ describe("Header component", () => {
   it("shows public navigation links when the user is not authenticated", () => {
     useAuth.mockReturnValue({
       user: null,
-      logout: jest.fn(),
+      logout: vi.fn(),
       isAuthenticated: () => false,
     });
 
@@ -36,7 +37,7 @@ describe("Header component", () => {
   it("shows authenticated navigation and user greeting when logged in", () => {
     useAuth.mockReturnValue({
       user: { name: "Alice", email: "alice@example.com" },
-      logout: jest.fn(),
+      logout: vi.fn(),
       isAuthenticated: () => true,
     });
 
@@ -51,7 +52,7 @@ describe("Header component", () => {
 
   it("calls logout when the logout button is clicked", async () => {
     const user = userEvent.setup();
-    const logoutMock = jest.fn();
+    const logoutMock = vi.fn();
 
     useAuth.mockReturnValue({
       user: { email: "demo@example.com" },
