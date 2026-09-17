@@ -4,8 +4,8 @@ const Home = () => {
   return (
     <div style={{ minHeight: '100vh' }}>
       <div style={heroStyle}>
-        <h1>Track Your Fitness Journey</h1>
-        <p>Log workouts, track progress, and achieve your goals with FitTracker.</p>
+        <h1>Share Your Stories with the World</h1>
+        <p>Create, publish, and manage your blog posts easily with BlogHub.</p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
           <Link to="/register" style={btnPrimary}>Get Started</Link>
           <Link to="/login" style={btnSecondary}>Login</Link>
@@ -14,9 +14,9 @@ const Home = () => {
       <div style={{ padding: '4rem 2rem', textAlign: 'center' }}>
         <h2>Core Features</h2>
         <div style={gridStyle}>
-          <div style={cardStyle}><h3>Track Progress</h3><p>Monitor your improvements over time.</p></div>
-          <div style={cardStyle}><h3>Custom Workouts</h3><p>Create routines that fit your lifestyle.</p></div>
-          <div style={cardStyle}><h3>Stay Motivated</h3><p>Visualize your PRs and journey.</p></div>
+          <div style={cardStyle}><h3>Write & Publish</h3><p>Share your thoughts with a global audience.</p></div>
+          <div style={cardStyle}><h3>Manage Posts</h3><p>Edit or delete your content anytime.</p></div>
+          <div style={cardStyle}><h3>Connect</h3><p>Join a community of passionate writers.</p></div>
         </div>
       </div>
     </div>

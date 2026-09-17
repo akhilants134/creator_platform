@@ -1,0 +1,111 @@
+// Trigger CI: test comment for new repo
+// Trigger CI: test comment
+import dotenv from "dotenv";
+import { jest } from "@jest/globals";
+import request from "supertest";
+import app from "../app.js";
+import User from "../models/User.js";
+import { initDb, pool } from "../config/db.js";
+
+// Always load .env.test if present, fallback to .env
+import fs from "fs";
+const envTestPath = new URL("../.env.test", import.meta.url).pathname;
+const envPath = new URL("../.env", import.meta.url).pathname;
+if (fs.existsSync(envTestPath)) {
+  dotenv.config({ path: envTestPath });
+} else if (fs.existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+}
+
+jest.setTimeout(30000);
+
+describe("Auth Routes", () => {
+  beforeAll(async () => {
+    await initDb();
+    await pool.query("DELETE FROM posts; DELETE FROM users;");
+  });
+
+  afterEach(async () => {
+    await pool.query("DELETE FROM posts; DELETE FROM users;");
+  });
+
+  afterAll(async () => {
+    await pool.end();
+  });
+
+  test("should register a new user successfully", async () => {
+    const res = await request(app).post("/api/users/register").send({
+      name: "Test User",
+      email: "testuser@example.com",
+      password: "password123",
+    });
+
+    // Intentionally break the test for CI failure scenario
+    expect(res.status).toBe(201); // Restored correct status for CI pass
+    expect(res.body).toHaveProperty("success", true);
+    expect(res.body).toHaveProperty("data");
+    expect(res.body.data).toHaveProperty("email", "testuser@example.com");
+  });
+
+  test("should fail to register with an existing email", async () => {
+    await request(app).post("/api/users/register").send({
+      name: "Existing User",
+      email: "existing@example.com",
+      password: "password123",
+    });
+
+    const res = await request(app).post("/api/users/register").send({
+      name: "Another User",
+      email: "existing@example.com",
+      password: "differentpassword",
+    });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty("message");
+    expect(res.body.message.toLowerCase()).toContain("already exists");
+  });
+
+  test("should fail to register with missing required fields", async () => {
+    const res = await request(app).post("/api/users/register").send({
+      name: "Incomplete User",
+    });
+
+    expect(res.status).toBe(400);
+    expect(res.body).toHaveProperty("message");
+  });
+
+  test("should log in with correct credentials", async () => {
+    await request(app).post("/api/users/register").send({
+      name: "Login Test User",
+      email: "login@example.com",
+      password: "password123",
+    });
+
+    const res = await request(app).post("/api/users/login").send({
+      email: "login@example.com",
+      password: "password123",
+    });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toHaveProperty("token");
+    expect(res.body).toHaveProperty("success", true);
+  });
+
+  test("should fail to log in with wrong password", async () => {
+    await request(app).post("/api/auth/register").send({
+      name: "Password Test User",
+      email: "wrongpass@example.com",
+      password: "correctpassword",
+    });
+
+    const res = await request(app).post("/api/users/login").send({
+      email: "wrongpass@example.com",
+      password: "wrongpassword",
+    });
+
+    expect(res.status).toBe(401);
+    expect(res.body).toHaveProperty("message");
+  });
+});
+// PR demo comment
+// PR demo: test comment

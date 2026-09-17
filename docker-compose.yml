@@ -1,0 +1,38 @@
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: creator-platform-server
+    ports:
+      - "${SERVER_HOST_PORT:-5001}:5000"
+    # Option 2: use separate env files; .env.docker overrides local values for container networking (mongo hostname).
+    env_file:
+      - ./server/.env
+      - ./server/.env.docker
+    depends_on:
+      - mongo
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: creator-platform-client
+    ports:
+      - "${CLIENT_HOST_PORT:-3000}:80"
+    depends_on:
+      - server
+
+volumes:
+  mongo-data:
