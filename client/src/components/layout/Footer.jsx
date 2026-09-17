@@ -9,7 +9,18 @@ const Footer = () => {
   );
 };
 
-const footerStyle = { backgroundColor: '#333', color: 'white', padding: '2rem 0', marginTop: 'auto', textAlign: 'center' };
-const containerStyle = { maxWidth: '1200px', margin: '0 auto', padding: '0 2rem' };
+const footerStyle = {
+  backgroundColor: '#333',
+  color: 'white',
+  padding: '2rem 0',
+  marginTop: 'auto',
+  textAlign: 'center',
+};
+
+const containerStyle = {
+  maxWidth: '1200px',
+  margin: '0 auto',
+  padding: '0 2rem',
+};
 
 export default Footer;

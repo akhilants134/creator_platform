@@ -13,7 +13,8 @@ import { createApp } from "./app.js";
 import { originValidator } from "./config/cors.js";
 import logger from "./logger.js";
 
-dotenv.config();
+// Connect to database
+connectDB();
 
 const PORT = process.env.PORT || 5000;
 const dbURI =
@@ -50,6 +51,25 @@ app.get("/", (req, res) => {
   });
 });
 
+app.use('/api/users', userRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/posts', postRoutes);
+app.use('/api/debug', debugRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/upload', uploadRoutes);
+
+// Health check endpoint (keep this for testing)
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    message: 'Server is running!',
+    timestamp: new Date(),
+  });
+});
+
+// Error handling middleware (must be after all routes)
+app.use(errorHandler);
+
+// Start server
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 if (!dbURI) {
