@@ -1,4 +1,10 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Header from "./components/layout/Header";
+import Footer from "./components/layout/Footer";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
 import { useEffect } from "react";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
@@ -90,6 +96,7 @@ function App() {
 
 const NotFound = () => (
   <div style={{ textAlign: "center", padding: "4rem" }}>
+    <h1>404-Page Not Found</h1>
     <h1>404 - Page Not Found</h1>
     <p>The workout page you're looking for doesn't exist.</p>
   </div>
