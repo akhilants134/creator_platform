@@ -43,6 +43,25 @@ const EditPost = () => {
     setImage(e.target.files[0]);
   };
 
+  const handleUpload = async (imageFormData) => {
+    setUploading(true);
+    setUploadError('');
+
+    try {
+      const response = await api.post('/api/upload', imageFormData);
+      if (response.data.success) {
+        setCoverImageUrl(response.data.url);
+        toast.success('Image updated successfully!');
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || 'Image upload failed';
+      setUploadError(message);
+      toast.error(message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);

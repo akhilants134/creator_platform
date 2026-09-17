@@ -196,7 +196,7 @@ export const getUserById = async (req, res) => {
 export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, email } = req.body;
+    const { name, firstName: rFirstName, lastName: rLastName, email } = req.body;
 
     const currentUserId = req.user?.id || req.user?._id;
     if (currentUserId !== id) {

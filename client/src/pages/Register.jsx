@@ -11,6 +11,7 @@ const Register = () => {
     confirmPassword: "",
   });
 
+
   // UI states
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -50,6 +51,14 @@ const Register = () => {
     } else if (formData.name.trim().length > 50) {
       newErrors.name = "Name cannot exceed 50 characters";
     }
+
+    // Last Name validation
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'Last name is required';
+    } else if (formData.lastName.trim().length < 2) {
+      newErrors.lastName = 'Last name must be at least 2 characters';
+    }
+
 
     // Email validation
     if (!formData.email.trim()) {
@@ -97,7 +106,8 @@ const Register = () => {
     try {
       // Prepare data to send (exclude confirmPassword)
       const registrationData = {
-        name: formData.name.trim(),
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
       };
@@ -150,21 +160,42 @@ const Register = () => {
         <form onSubmit={handleSubmit} style={formStyle}>
           {/* Name Field */}
           <div style={fieldStyle}>
-            <label htmlFor="name" style={labelStyle}>
-              Name *
+            <label htmlFor="firstName" style={labelStyle}>
+              First Name *
             </label>
             <input
               type="text"
-              id="name"
-              name="name"
-              value={formData.name}
+              id="firstName"
+              name="firstName"
+              value={formData.firstName}
               onChange={handleChange}
-              placeholder="Enter your full name"
-              style={errors.name ? inputErrorStyle : inputStyle}
+              placeholder="Enter your first name"
+              style={errors.firstName ? inputErrorStyle : inputStyle}
               disabled={isLoading}
             />
             {errors.name && <span style={errorTextStyle}>{errors.name}</span>}
           </div>
+
+          {/* Last Name Field */}
+          <div style={fieldStyle}>
+            <label htmlFor="lastName" style={labelStyle}>
+              Last Name *
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              value={formData.lastName}
+              onChange={handleChange}
+              placeholder="Enter your last name"
+              style={errors.lastName ? inputErrorStyle : inputStyle}
+              disabled={isLoading}
+            />
+            {errors.lastName && (
+              <span style={errorTextStyle}>{errors.lastName}</span>
+            )}
+          </div>
+
 
           {/* Email Field */}
           <div style={fieldStyle}>

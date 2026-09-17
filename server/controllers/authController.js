@@ -21,10 +21,21 @@ const getUserDisplayName = (user) => {
 // @access  Public
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, firstName: rFirstName, lastName: rLastName, email, password } = req.body;
+
+    // Determine firstName and lastName
+    let firstName = rFirstName;
+    let lastName = rLastName;
+
+    if (!firstName && name) {
+      const nameParts = name.trim().split(' ');
+      firstName = nameParts[0];
+      lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : ' ';
+    }
+
 
     // Check if user already exists
-    const userExists = await User.findOne({ email });
+    const userExists = await User.findOne({ email: String(email) });
     if (userExists) {
       return res
         .status(400)
@@ -33,10 +44,12 @@ export const registerUser = async (req, res) => {
 
     // Create user
     const user = await User.create({
-      name,
+      firstName,
+      lastName,
       email,
       password,
     });
+
 
     if (user) {
       res.status(201).json({
