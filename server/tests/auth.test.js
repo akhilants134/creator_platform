@@ -1,7 +1,10 @@
+// Trigger CI: test comment for new repo
+// Trigger CI: test comment
 import dotenv from "dotenv";
 import { jest } from "@jest/globals";
 import request from "supertest";
 import app from "../app.js";
+import User from "../models/User.js";
 import { initDb, pool } from "../config/db.js";
 
 // Always load .env.test if present, fallback to .env
@@ -37,7 +40,8 @@ describe("Auth Routes", () => {
       password: "password123",
     });
 
-    expect(res.status).toBe(201);
+    // Intentionally break the test for CI failure scenario
+    expect(res.status).toBe(201); // Restored correct status for CI pass
     expect(res.body).toHaveProperty("success", true);
     expect(res.body).toHaveProperty("data");
     expect(res.body.data).toHaveProperty("email", "testuser@example.com");
@@ -103,3 +107,5 @@ describe("Auth Routes", () => {
     expect(res.body).toHaveProperty("message");
   });
 });
+// PR demo comment
+// PR demo: test comment
